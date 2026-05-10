@@ -3,3 +3,6 @@ dist
 .env
 coverage
 .prisma
+
+*.txt
+*.md
