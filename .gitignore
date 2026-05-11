@@ -3,6 +3,8 @@ dist
 .env
 coverage
 .prisma
+backend/generated
+
 generated
 
 *.txt
