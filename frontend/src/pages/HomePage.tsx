@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Link } from "react-router-dom";
 
 export default function HomePage() {
   const fullName = "John Doe"; // Placeholder
@@ -21,9 +22,8 @@ export default function HomePage() {
       
       {/* We only show the welcome name if there's an actual active dashboard view context, keeping it minimal to match the provided image reference. */}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
         <div className="md:col-span-2">
-          <h2 className="text-xl font-normal text-slate-700 mb-4">My Progress</h2>
           <Card className="shadow-sm border border-slate-200 bg-white min-h-[500px] text-slate-800 rounded-md">
             <Tabs defaultValue="classes" className="w-full">
               <TabsList className="grid w-full grid-cols-2 rounded-t-md rounded-b-none bg-slate-50 p-0 h-auto border-b border-slate-200">
@@ -79,9 +79,6 @@ export default function HomePage() {
         </div>
 
         <div className="md:col-span-1">
-          <div className="flex items-center gap-3 mb-4 justify-between">
-             <h2 className="text-xl font-normal text-slate-700">Ongoing Class</h2>
-          </div>
           <Card className="shadow-sm border border-slate-200 bg-white min-h-[500px] text-slate-800 rounded-md">
             <CardHeader className="border-b border-slate-100 pb-4">
               <CardTitle className="text-xl font-normal text-slate-700 flex justify-between items-center">
@@ -94,26 +91,19 @@ export default function HomePage() {
             </CardHeader>
             <CardContent className="pt-6">
               <ul className="space-y-5">
-                <li className="flex items-center gap-3">
-                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
-                  <span className="text-slate-600 font-medium">Upload profile photo</span>
+                <li>
+                  <Link to="/profile" className="flex items-center gap-3 group">
+                    <div className="h-4 w-4 rounded-full border-2 border-slate-300 group-hover:border-[#009FE3] transition-colors"></div>
+                    <span className="text-slate-600 font-medium group-hover:text-[#009FE3] transition-colors">Upload profile photo</span>
+                  </Link>
                 </li>
-                <li className="flex items-center gap-3">
-                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
-                  <span className="text-slate-600 font-medium">Pay tuition fee</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="h-4 w-4 rounded-full border-2 border-[#009FE3]"></div>
-                  <span className="text-slate-600 font-medium">Join campus group</span>
+                <li>
+                  <Link to="/courses" className="flex items-center gap-3 group">
+                    <div className="h-4 w-4 rounded-full border-2 border-slate-300 group-hover:border-[#009FE3] transition-colors"></div>
+                    <span className="text-slate-600 font-medium group-hover:text-[#009FE3] transition-colors">Enroll in new course</span>
+                  </Link>
                 </li>
               </ul>
-              
-              <div className="mt-8 pt-6 border-t border-slate-100">
-                 <Button className="w-full bg-[#1b5fcc] hover:bg-blue-800 text-white rounded-md h-12 flex justify-between items-center px-4">
-                    <span>View things to do in session 5</span>
-                    <span>›</span>
-                 </Button>
-              </div>
             </CardContent>
           </Card>
         </div>
