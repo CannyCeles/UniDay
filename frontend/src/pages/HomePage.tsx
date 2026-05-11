@@ -3,19 +3,25 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function HomePage() {
-  const fullName = "John Doe"; // Placeholder
+  const { user } = useAuth();
+  const fullName = user?.name || "User";
 
   return (
     <div className="flex flex-col w-full gap-6">
       <header className="flex justify-between items-center pb-4 border-b border-gray-200">
         <h1 className="text-3xl items-center font-normal text-slate-700 tracking-tight">Dashboard</h1>
         <div className="flex items-center gap-3">
-          <Avatar className="h-8 w-8 border border-slate-200">
-            <AvatarImage src="" />
-            <AvatarFallback className="bg-[#009FE3] text-white text-xs">JD</AvatarFallback>
-          </Avatar>
+          <Link to="/profile">
+            <Avatar className="h-8 w-8 border border-slate-200 cursor-pointer hover:ring-2 hover:ring-[#009FE3] transition-all">
+              <AvatarImage src="" />
+              <AvatarFallback className="bg-[#009FE3] text-white text-xs">
+                {fullName.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
           <span className="text-slate-600 text-sm hidden sm:block">Welcome, {fullName}</span>
         </div>
       </header>

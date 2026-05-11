@@ -2,13 +2,15 @@ import { LogOut, Home, User, BookOpen } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Sidebar() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout, user } = useAuth();
 
   const handleLogout = () => {
-    // TODO: Clear auth status
+    logout();
     navigate("/login");
   };
 
@@ -22,9 +24,9 @@ export default function Sidebar() {
     <div className="flex flex-col h-full bg-[#0373fc] text-white border-r border-blue-600">
       <div className="p-6 pb-2">
         <div className="bg-white/10 rounded-md p-4 mb-4 border border-white/20">
-          <h3 className="font-semibold text-lg text-white">Student</h3>
-          <p className="text-white/80 text-sm">Undergraduate</p>
-          <p className="text-white/80 text-xs mt-1">BINUS University</p>
+          <h3 className="font-semibold text-lg text-white capitalize">{user?.role || 'Guest'}</h3>
+          <p className="text-white/80 text-sm">{user?.name || 'User'}</p>
+          <p className="text-white/80 text-xs mt-1">{user?.userId || ''}</p>
           <div className="mt-3">
              <Badge className="bg-[#f17105] hover:bg-[#d66405] text-white text-xs border-0">CHANGE</Badge>
           </div>
