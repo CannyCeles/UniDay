@@ -5,6 +5,7 @@ import PageLayout from "@/layouts/PageLayout";
 import HomePage from "@/pages/HomePage";
 import CoursesPage from "@/pages/CoursesPage";
 import ProfilePage from "@/pages/ProfilePage";
+import StudentsPage from "@/pages/StudentsPage";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 const router = createBrowserRouter([
@@ -35,6 +36,10 @@ const router = createBrowserRouter([
           {
             path: "courses",
             Component: CoursesPage
+          },
+          {
+            path: "students",
+            Component: StudentsPage
           },
           {
             path: "profile",

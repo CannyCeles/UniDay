@@ -1,0 +1,58 @@
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
+
+export default function StudentsPage() {
+  const { token } = useAuth();
+  const [students, setStudents] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await fetch("http://localhost:3000/student", {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setStudents(data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch students:", error);
+      }
+    };
+    if (token) fetchStudents();
+  }, [token]);
+
+  return (
+    <div className="flex flex-col w-full gap-6">
+      <header className="flex justify-between items-center pb-4 border-b border-gray-200">
+        <div>
+          <h1 className="text-3xl items-center font-normal text-slate-700 tracking-tight">Students</h1>
+          <p className="text-slate-500 mt-1">Directory of all registered students.</p>
+        </div>
+      </header>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {students.map((student) => (
+          <Card key={student.id} className="shadow-sm border border-slate-200 bg-white rounded-md">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-lg font-semibold text-slate-800">{student.name}</CardTitle>
+                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                  Active
+                </Badge>
+              </div>
+              <CardDescription className="text-sm font-mono text-[#009FE3]">{student.studentId}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-slate-600 font-medium">BINUS University</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}

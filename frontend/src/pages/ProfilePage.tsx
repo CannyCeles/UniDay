@@ -8,7 +8,7 @@ export default function ProfilePage() {
   const { user } = useAuth();
   const fullName = user?.name || "User";
   const studentId = user?.userId || "N/A";
-  const email = "N/A";
+  const email = user?.email || "N/A";
 
   return (
     <div className="flex flex-col w-full gap-6">
