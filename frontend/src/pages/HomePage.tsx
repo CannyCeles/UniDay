@@ -1,0 +1,123 @@
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+export default function HomePage() {
+  const fullName = "John Doe"; // Placeholder
+
+  return (
+    <div className="flex flex-col w-full gap-6">
+      <header className="flex justify-between items-center pb-4 border-b border-gray-200">
+        <h1 className="text-3xl items-center font-normal text-slate-700 tracking-tight">Dashboard</h1>
+        <div className="flex items-center gap-3">
+          <Avatar className="h-8 w-8 border border-slate-200">
+            <AvatarImage src="" />
+            <AvatarFallback className="bg-[#009FE3] text-white text-xs">JD</AvatarFallback>
+          </Avatar>
+          <span className="text-slate-600 text-sm hidden sm:block">Welcome, {fullName}</span>
+        </div>
+      </header>
+      
+      {/* We only show the welcome name if there's an actual active dashboard view context, keeping it minimal to match the provided image reference. */}
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="md:col-span-2">
+          <h2 className="text-xl font-normal text-slate-700 mb-4">My Progress</h2>
+          <Card className="shadow-sm border border-slate-200 bg-white min-h-[500px] text-slate-800 rounded-md">
+            <Tabs defaultValue="classes" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 rounded-t-md rounded-b-none bg-slate-50 p-0 h-auto border-b border-slate-200">
+                <TabsTrigger 
+                  value="classes"
+                  className="data-[state=active]:bg-white data-[state=active]:text-[#009FE3] data-[state=active]:border-b-2 data-[state=active]:border-[#009FE3] py-4 rounded-none transition-all text-slate-500 hover:text-slate-700"
+                >
+                  View Upcoming Classes
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="enrollment"
+                  className="data-[state=active]:bg-white data-[state=active]:text-[#009FE3] data-[state=active]:border-b-2 data-[state=active]:border-[#009FE3] py-4 rounded-none transition-all text-slate-500 hover:text-slate-700"
+                >
+                  Course Enrollment
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="classes" className="p-6 mt-0">
+                <div className="flex flex-col gap-4">
+                  <div className="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-800">Software Engineering</h3>
+                      <p className="text-slate-500 text-sm mt-1">COMP6100001 • LAB</p>
+                    </div>
+                    <div className="text-right flex flex-col items-end">
+                      <span className="bg-emerald-100/80 text-emerald-700 px-3 py-1 rounded-full text-sm font-medium mb-1">Today</span>
+                      <p className="text-sm text-emerald-600 font-medium">10:00 - 11:40 AM</p>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                      <h3 className="text-lg font-semibold text-slate-800">Database Systems</h3>
+                      <p className="text-slate-500 text-sm mt-1">COMP6083001 • LEC</p>
+                    </div>
+                    <div className="text-right flex flex-col items-end">
+                      <span className="bg-orange-100/80 text-orange-700 px-3 py-1 rounded-full text-sm font-medium mb-1">Tomorrow</span>
+                      <p className="text-sm text-orange-600 font-medium">13:00 - 14:40 PM</p>
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="enrollment" className="p-6 mt-0">
+                <div className="flex flex-col gap-4 text-center py-12">
+                  <p className="text-slate-500">Registration opens next week.</p>
+                  <Button variant="outline" className="mx-auto bg-[#009FE3] text-white border-transparent hover:bg-[#008bc6] hover:text-white mt-4 w-fit">
+                    View Course Catalog
+                  </Button>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </Card>
+        </div>
+
+        <div className="md:col-span-1">
+          <div className="flex items-center gap-3 mb-4 justify-between">
+             <h2 className="text-xl font-normal text-slate-700">Ongoing Class</h2>
+          </div>
+          <Card className="shadow-sm border border-slate-200 bg-white min-h-[500px] text-slate-800 rounded-md">
+            <CardHeader className="border-b border-slate-100 pb-4">
+              <CardTitle className="text-xl font-normal text-slate-700 flex justify-between items-center">
+                To-Do
+                <Avatar className="h-8 w-8 border border-slate-200">
+                  <AvatarImage src="" />
+                  <AvatarFallback className="bg-[#009FE3] text-white text-xs">JD</AvatarFallback>
+                </Avatar>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <ul className="space-y-5">
+                <li className="flex items-center gap-3">
+                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
+                  <span className="text-slate-600 font-medium">Upload profile photo</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="h-4 w-4 rounded-full border-2 border-slate-300"></div>
+                  <span className="text-slate-600 font-medium">Pay tuition fee</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <div className="h-4 w-4 rounded-full border-2 border-[#009FE3]"></div>
+                  <span className="text-slate-600 font-medium">Join campus group</span>
+                </li>
+              </ul>
+              
+              <div className="mt-8 pt-6 border-t border-slate-100">
+                 <Button className="w-full bg-[#1b5fcc] hover:bg-blue-800 text-white rounded-md h-12 flex justify-between items-center px-4">
+                    <span>View things to do in session 5</span>
+                    <span>›</span>
+                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
