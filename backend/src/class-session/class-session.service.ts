@@ -1,26 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import { CreateClassSessionDto } from './dto/create-class-session.dto';
-import { UpdateClassSessionDto } from './dto/update-class-session.dto';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class ClassSessionService {
-  create(createClassSessionDto: CreateClassSessionDto) {
-    return 'This action adds a new classSession';
+  constructor(private prisma: PrismaService) {}
+
+  async create(createClassSessionDto: any) {
+    return this.prisma.classSession.create({
+      data: createClassSessionDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all classSession`;
+  async findAll() {
+    return this.prisma.classSession.findMany({
+      include: {
+        course: true,
+        attendances: true,
+      }
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} classSession`;
+  async findOne(id: number) {
+    return this.prisma.classSession.findUnique({
+      where: { id },
+      include: {
+        course: true,
+        attendances: true,
+      }
+    });
   }
 
-  update(id: number, updateClassSessionDto: UpdateClassSessionDto) {
-    return `This action updates a #${id} classSession`;
+  async update(id: number, updateClassSessionDto: any) {
+    return this.prisma.classSession.update({
+      where: { id },
+      data: updateClassSessionDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} classSession`;
+  async remove(id: number) {
+    return this.prisma.classSession.delete({
+      where: { id },
+    });
   }
 }

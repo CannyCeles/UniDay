@@ -36,13 +36,13 @@ export default function HomePage() {
                   value="classes"
                   className="data-[state=active]:bg-white data-[state=active]:text-[#009FE3] data-[state=active]:border-b-2 data-[state=active]:border-[#009FE3] py-4 rounded-none transition-all text-slate-500 hover:text-slate-700"
                 >
-                  View Upcoming Classes
+                  {user?.role === 'lecturer' ? "My Upcoming Classes" : "View Upcoming Classes"}
                 </TabsTrigger>
                 <TabsTrigger 
                   value="enrollment"
                   className="data-[state=active]:bg-white data-[state=active]:text-[#009FE3] data-[state=active]:border-b-2 data-[state=active]:border-[#009FE3] py-4 rounded-none transition-all text-slate-500 hover:text-slate-700"
                 >
-                  Course Enrollment
+                  {user?.role === 'lecturer' ? "Teaching Schedule" : "Course Enrollment"}
                 </TabsTrigger>
               </TabsList>
 
@@ -73,10 +73,21 @@ export default function HomePage() {
 
               <TabsContent value="enrollment" className="p-6 mt-0">
                 <div className="flex flex-col gap-4 text-center py-12">
-                  <p className="text-slate-500">Registration opens next week.</p>
-                  <Button variant="outline" className="mx-auto bg-[#009FE3] text-white border-transparent hover:bg-[#008bc6] hover:text-white mt-4 w-fit">
-                    View Course Catalog
-                  </Button>
+                  {user?.role === 'lecturer' ? (
+                    <>
+                      <p className="text-slate-500">Your teaching schedule will be available when semester begins.</p>
+                      <Button variant="outline" className="mx-auto bg-[#009FE3] text-white border-transparent hover:bg-[#008bc6] hover:text-white mt-4 w-fit">
+                        Manage Syllabus
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <p className="text-slate-500">Registration opens next week.</p>
+                      <Button variant="outline" className="mx-auto bg-[#009FE3] text-white border-transparent hover:bg-[#008bc6] hover:text-white mt-4 w-fit">
+                        View Course Catalog
+                      </Button>
+                    </>
+                  )}
                 </div>
               </TabsContent>
             </Tabs>
@@ -98,12 +109,21 @@ export default function HomePage() {
                     <span className="text-slate-600 font-medium group-hover:text-[#009FE3] transition-colors">Upload profile photo</span>
                   </Link>
                 </li>
-                <li>
-                  <Link to="/courses" className="flex items-center gap-3 group">
-                    <div className="h-4 w-4 rounded-full border-2 border-slate-300 group-hover:border-[#009FE3] transition-colors"></div>
-                    <span className="text-slate-600 font-medium group-hover:text-[#009FE3] transition-colors">Enroll in new course</span>
-                  </Link>
-                </li>
+                {user?.role === 'lecturer' ? (
+                  <li>
+                    <Link to="/courses" className="flex items-center gap-3 group">
+                      <div className="h-4 w-4 rounded-full border-2 border-slate-300 group-hover:border-[#009FE3] transition-colors"></div>
+                      <span className="text-slate-600 font-medium group-hover:text-[#009FE3] transition-colors">Create class sessions</span>
+                    </Link>
+                  </li>
+                ) : (
+                  <li>
+                    <Link to="/courses" className="flex items-center gap-3 group">
+                      <div className="h-4 w-4 rounded-full border-2 border-slate-300 group-hover:border-[#009FE3] transition-colors"></div>
+                      <span className="text-slate-600 font-medium group-hover:text-[#009FE3] transition-colors">Enroll in new course</span>
+                    </Link>
+                  </li>
+                )}
               </ul>
             </CardContent>
           </Card>

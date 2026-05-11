@@ -1,4 +1,4 @@
-import { LogOut, Home, User, BookOpen } from "lucide-react";
+import { LogOut, Home, User, BookOpen, Users } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +17,7 @@ export default function Sidebar() {
   const navItems = [
     { label: "Home", icon: <Home className="w-5 h-5 mr-3" />, path: "/home" },
     { label: "Courses", icon: <BookOpen className="w-5 h-5 mr-3" />, path: "/courses" },
+    ...(user?.role === "lecturer" ? [{ label: "Students", icon: <Users className="w-5 h-5 mr-3" />, path: "/students" }] : []),
     { label: "Profile", icon: <User className="w-5 h-5 mr-3" />, path: "/profile" },
   ];
 
