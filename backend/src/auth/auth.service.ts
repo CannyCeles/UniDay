@@ -78,7 +78,7 @@ export class AuthService {
     const isMatch = await bcrypt.compare(dto.password, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
-    const payload = { sub: user.id, role: dto.role, name: user.name };
+    const payload = { sub: user.id, role: dto.role, name: user.name, email: user.email };
     const userId = dto.role === 'student' ? (user as any).studentId : (user as any).lecturerId;
     
     return {
@@ -86,6 +86,7 @@ export class AuthService {
       user: {
         id: user.id,
         name: user.name,
+        email: user.email,
         userId: userId,
         role: dto.role
       }
