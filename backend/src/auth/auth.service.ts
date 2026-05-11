@@ -1,26 +1,92 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { CreateStudentDto } from '../student/dto/create-student.dto';
+import { CreateLecturerDto } from '../lecturer/dto/create-lecturer.dto';
+import { LoginDto } from './dto/login.dto';
+import { PrismaService } from '../../prisma/prisma.service';
+import * as bcrypt from 'bcryptjs';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+  ) {}
+
+  async registerStudent(dto: CreateStudentDto) {
+    const existing = await this.prisma.student.findUnique({
+      where: { studentId: dto.studentId }
+    });
+    if (existing) throw new ConflictException('Student ID already exists');
+
+    const emailExisting = await this.prisma.student.findUnique({
+      where: { email: dto.email }
+    });
+    if (emailExisting) throw new ConflictException('Email already in use');
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    const user = await this.prisma.student.create({
+      data: {
+        studentId: dto.studentId,
+        name: dto.name,
+        email: dto.email,
+        password: hashedPassword,
+      },
+    });
+
+    return { message: 'Student registered successfully', user: { id: user.id, studentId: user.studentId } };
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async registerLecturer(dto: CreateLecturerDto) {
+    const existing = await this.prisma.lecturer.findUnique({
+      where: { lecturerId: dto.lecturerId }
+    });
+    if (existing) throw new ConflictException('Lecturer ID already exists');
+
+    const emailExisting = await this.prisma.lecturer.findUnique({
+      where: { email: dto.email }
+    });
+    if (emailExisting) throw new ConflictException('Email already in use');
+
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+    const user = await this.prisma.lecturer.create({
+      data: {
+        lecturerId: dto.lecturerId,
+        name: dto.name,
+        email: dto.email,
+        password: hashedPassword,
+      },
+    });
+
+    return { message: 'Lecturer registered successfully', user: { id: user.id, lecturerId: user.lecturerId } };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
+  async login(dto: LoginDto) {
+    let user;
+    if (dto.role === 'student') {
+      user = await this.prisma.student.findUnique({ where: { studentId: dto.userId } });
+    } else {
+      user = await this.prisma.lecturer.findUnique({ where: { lecturerId: dto.userId } });
+    }
 
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
+    if (!user) throw new UnauthorizedException('Invalid ID');
 
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+    const isMatch = await bcrypt.compare(dto.password, user.password);
+    if (!isMatch) throw new UnauthorizedException('Invalid credentials');
+
+    const payload = { sub: user.id, role: dto.role, name: user.name };
+    const userId = dto.role === 'student' ? user.studentId : user.lecturerId;
+    
+    return {
+      access_token: await this.jwtService.signAsync(payload),
+      user: {
+        id: user.id,
+        name: user.name,
+        userId: userId,
+        role: dto.role
+      }
+    };
   }
 }
