@@ -4,7 +4,7 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button"; 
+import { Button } from "@/components/ui/button";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -25,7 +25,7 @@ export default function Login() {
     try {
       // TODO: Implement actual backend login for student
       console.log("Login Student", studentData);
-      navigate("/");
+      navigate("/home");
     } catch (error) {
       console.error(error);
     }
@@ -36,30 +36,40 @@ export default function Login() {
     try {
       // TODO: Implement actual backend login for lecturer
       console.log("Login Lecturer", lecturerData);
-      navigate("/");
+      navigate("/home");
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-slate-50 text-slate-900">
-      <Card className="w-[420px] shadow-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-semibold tracking-tight">Welcome Back</CardTitle>
-          <CardDescription>Log in to your account</CardDescription>
+    <div className="flex min-h-screen w-full items-center justify-center bg-sky-50 text-slate-800 py-12 font-sans">
+      <Card className="w-[420px] shadow-sm border border-slate-200 bg-white rounded-md">
+        <CardHeader className="text-center pb-6">
+          <CardTitle className="text-2xl font-normal text-slate-700 tracking-tight">Welcome Back</CardTitle>
+          <CardDescription className="text-slate-500">Log in to your account</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="student" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="student">Student</TabsTrigger>
-              <TabsTrigger value="lecturer">Lecturer</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-6 bg-slate-50 p-1 rounded-md border border-slate-100">
+              <TabsTrigger 
+                value="student" 
+                className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-sm transition-all"
+              >
+                Student
+              </TabsTrigger>
+              <TabsTrigger 
+                value="lecturer" 
+                className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-sm transition-all"
+              >
+                Lecturer
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="student">
               <form onSubmit={handleStudentSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="student-email">Email Address</Label>
+                  <Label htmlFor="student-email" className="font-normal text-slate-600">Email Address</Label>
                   <Input
                     id="student-email"
                     type="email"
@@ -68,10 +78,11 @@ export default function Login() {
                     value={studentData.email}
                     onChange={handleStudentChange}
                     required
+                    className="border-slate-200 focus-visible:ring-blue-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="student-password">Password</Label>
+                  <Label htmlFor="student-password" className="font-normal text-slate-600">Password</Label>
                   <Input
                     id="student-password"
                     name="password"
@@ -80,9 +91,10 @@ export default function Login() {
                     value={studentData.password}
                     onChange={handleStudentChange}
                     required
+                    className="border-slate-200 focus-visible:ring-blue-500"
                   />
                 </div>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                   Log In As Student
                 </Button>
               </form>
@@ -91,7 +103,7 @@ export default function Login() {
             <TabsContent value="lecturer">
               <form onSubmit={handleLecturerSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="lecturer-email">Email Address</Label>
+                  <Label htmlFor="lecturer-email" className="font-normal text-slate-600">Email Address</Label>
                   <Input
                     id="lecturer-email"
                     type="email"
@@ -100,10 +112,11 @@ export default function Login() {
                     value={lecturerData.email}
                     onChange={handleLecturerChange}
                     required
+                    className="border-slate-200 focus-visible:ring-blue-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lecturer-password">Password</Label>
+                  <Label htmlFor="lecturer-password" className="font-normal text-slate-600">Password</Label>
                   <Input
                     id="lecturer-password"
                     name="password"
@@ -112,9 +125,10 @@ export default function Login() {
                     value={lecturerData.password}
                     onChange={handleLecturerChange}
                     required
+                    className="border-slate-200 focus-visible:ring-blue-500"
                   />
                 </div>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white">
                   Log In As Lecturer
                 </Button>
               </form>

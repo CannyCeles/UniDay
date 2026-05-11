@@ -54,23 +54,33 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-slate-50 text-slate-900 py-12">
-      <Card className="w-[450px] shadow-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-semibold tracking-tight">Create an Account</CardTitle>
-          <CardDescription>Register as a new user</CardDescription>
+    <div className="flex min-h-screen w-full items-center justify-center bg-sky-50 text-slate-800 py-12 font-sans">
+      <Card className="w-[450px] shadow-sm border border-slate-200 bg-white rounded-md">
+        <CardHeader className="text-center pb-6">
+          <CardTitle className="text-2xl font-normal text-slate-700 tracking-tight">Create an Account</CardTitle>
+          <CardDescription className="text-slate-500">Register as a new user</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="student" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="student">Student</TabsTrigger>
-              <TabsTrigger value="lecturer">Lecturer</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 mb-6 bg-slate-50 p-1 rounded-md border border-slate-100">
+              <TabsTrigger 
+                value="student"
+                className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-sm transition-all"
+              >
+                Student
+              </TabsTrigger>
+              <TabsTrigger 
+                value="lecturer"
+                className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-sm transition-all"
+              >
+                Lecturer
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="student">
               <form onSubmit={handleStudentSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="studentId">Student ID</Label>
+                  <Label htmlFor="studentId" className="font-normal text-slate-600">Student ID</Label>
                   <Input
                     id="studentId"
                     name="studentId"
@@ -79,10 +89,11 @@ export default function Register() {
                     value={studentData.studentId}
                     onChange={handleStudentChange}
                     required
+                    className="border-slate-200 focus-visible:ring-blue-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="student-name">Full Name</Label>
+                  <Label htmlFor="student-name" className="font-normal text-slate-600">Full Name</Label>
                   <Input
                     id="student-name"
                     name="name"
@@ -91,10 +102,11 @@ export default function Register() {
                     value={studentData.name}
                     onChange={handleStudentChange}
                     required
+                    className="border-slate-200 focus-visible:ring-blue-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="student-email">Email Address</Label>
+                  <Label htmlFor="student-email" className="font-normal text-slate-600">Email Address</Label>
                   <Input
                     id="student-email"
                     name="email"
@@ -103,10 +115,11 @@ export default function Register() {
                     value={studentData.email}
                     onChange={handleStudentChange}
                     required
+                    className="border-slate-200 focus-visible:ring-blue-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="student-password">Password</Label>
+                  <Label htmlFor="student-password" className="font-normal text-slate-600">Password</Label>
                   <Input
                     id="student-password"
                     name="password"
@@ -115,9 +128,10 @@ export default function Register() {
                     value={studentData.password}
                     onChange={handleStudentChange}
                     required
+                    className="border-slate-200 focus-visible:ring-blue-500"
                   />
                 </div>
-                <Button type="submit" className="w-full mt-2">
+                <Button type="submit" className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white">
                   Sign Up As Student
                 </Button>
               </form>
@@ -126,7 +140,7 @@ export default function Register() {
             <TabsContent value="lecturer">
               <form onSubmit={handleLecturerSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="lecturerId">Lecturer ID</Label>
+                  <Label htmlFor="lecturerId" className="font-normal text-slate-600">Lecturer ID</Label>
                   <Input
                     id="lecturerId"
                     name="lecturerId"
@@ -135,10 +149,11 @@ export default function Register() {
                     value={lecturerData.lecturerId}
                     onChange={handleLecturerChange}
                     required
+                    className="border-slate-200 focus-visible:ring-blue-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lecturer-name">Full Name</Label>
+                  <Label htmlFor="lecturer-name" className="font-normal text-slate-600">Full Name</Label>
                   <Input
                     id="lecturer-name"
                     name="name"
@@ -147,10 +162,11 @@ export default function Register() {
                     value={lecturerData.name}
                     onChange={handleLecturerChange}
                     required
+                    className="border-slate-200 focus-visible:ring-blue-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lecturer-email">Email Address</Label>
+                  <Label htmlFor="lecturer-email" className="font-normal text-slate-600">Email Address</Label>
                   <Input
                     id="lecturer-email"
                     name="email"
@@ -159,10 +175,11 @@ export default function Register() {
                     value={lecturerData.email}
                     onChange={handleLecturerChange}
                     required
+                    className="border-slate-200 focus-visible:ring-blue-500"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="lecturer-password">Password</Label>
+                  <Label htmlFor="lecturer-password" className="font-normal text-slate-600">Password</Label>
                   <Input
                     id="lecturer-password"
                     name="password"
@@ -171,9 +188,10 @@ export default function Register() {
                     value={lecturerData.password}
                     onChange={handleLecturerChange}
                     required
+                    className="border-slate-200 focus-visible:ring-blue-500"
                   />
                 </div>
-                <Button type="submit" className="w-full mt-2">
+                <Button type="submit" className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white">
                   Sign Up As Lecturer
                 </Button>
               </form>
