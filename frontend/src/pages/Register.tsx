@@ -34,22 +34,46 @@ export default function Register() {
   const handleStudentSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // TODO: Implement actual backend registration for student
-      console.log("Register Student", studentData);
+      const response = await fetch("http://localhost:3000/auth/register/student", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(studentData),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.message || "Registration failed");
+        return;
+      }
+
+      console.log("Registered Student successfully");
       navigate("/login");
     } catch (error) {
       console.error(error);
+      alert("Something went wrong");
     }
   };
 
   const handleLecturerSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // TODO: Implement actual backend registration for lecturer
-      console.log("Register Lecturer", lecturerData);
+      const response = await fetch("http://localhost:3000/auth/register/lecturer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(lecturerData),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.message || "Registration failed");
+        return;
+      }
+
+      console.log("Registered Lecturer successfully");
       navigate("/login");
     } catch (error) {
       console.error(error);
+      alert("Something went wrong");
     }
   };
 
