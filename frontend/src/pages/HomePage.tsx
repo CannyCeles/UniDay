@@ -20,7 +20,6 @@ export default function HomePage() {
         </div>
       </header>
       
-      {/* We only show the welcome name if there's an actual active dashboard view context, keeping it minimal to match the provided image reference. */}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
         <div className="md:col-span-2">
@@ -83,10 +82,6 @@ export default function HomePage() {
             <CardHeader className="border-b border-slate-100 pb-4">
               <CardTitle className="text-xl font-normal text-slate-700 flex justify-between items-center">
                 To-Do
-                <Avatar className="h-8 w-8 border border-slate-200">
-                  <AvatarImage src="" />
-                  <AvatarFallback className="bg-[#009FE3] text-white text-xs">JD</AvatarFallback>
-                </Avatar>
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
