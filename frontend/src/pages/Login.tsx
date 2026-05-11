@@ -5,9 +5,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const [studentData, setStudentData] = useState({ studentId: "", password: "" });
   const [lecturerData, setLecturerData] = useState({ lecturerId: "", password: "" });
@@ -35,6 +37,8 @@ export default function Login() {
         return;
       }
 
+      const data = await response.json();
+      login(data.access_token, data.user);
       console.log("Login Student success");
       navigate("/home");
     } catch (error) {
@@ -58,6 +62,8 @@ export default function Login() {
         return;
       }
 
+      const data = await response.json();
+      login(data.access_token, data.user);
       console.log("Login Lecturer success");
       navigate("/home");
     } catch (error) {
