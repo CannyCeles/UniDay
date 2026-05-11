@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { BiometricService } from './biometric.service';
 import { CreateBiometricDto } from './dto/create-biometric.dto';
 import { UpdateBiometricDto } from './dto/update-biometric.dto';
+import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('biometric')
 export class BiometricController {
   constructor(private readonly biometricService: BiometricService) {}
