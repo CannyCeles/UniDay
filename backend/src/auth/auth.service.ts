@@ -66,9 +66,11 @@ export class AuthService {
   async login(dto: LoginDto) {
     let user;
     if (dto.role === 'student') {
-      user = await this.prisma.student.findUnique({ where: { studentId: dto.userId } });
+      if (!dto.studentId) throw new UnauthorizedException('Student ID is required');
+      user = await this.prisma.student.findUnique({ where: { studentId: dto.studentId } });
     } else {
-      user = await this.prisma.lecturer.findUnique({ where: { lecturerId: dto.userId } });
+      if (!dto.lecturerId) throw new UnauthorizedException('Lecturer ID is required');
+      user = await this.prisma.lecturer.findUnique({ where: { lecturerId: dto.lecturerId } });
     }
 
     if (!user) throw new UnauthorizedException('Invalid ID');
@@ -77,7 +79,7 @@ export class AuthService {
     if (!isMatch) throw new UnauthorizedException('Invalid credentials');
 
     const payload = { sub: user.id, role: dto.role, name: user.name };
-    const userId = dto.role === 'student' ? user.studentId : user.lecturerId;
+    const userId = dto.role === 'student' ? (user as any).studentId : (user as any).lecturerId;
     
     return {
       access_token: await this.jwtService.signAsync(payload),

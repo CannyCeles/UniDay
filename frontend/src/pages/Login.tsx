@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 export default function Login() {
   const navigate = useNavigate();
 
-  const [studentData, setStudentData] = useState({ email: "", password: "" });
-  const [lecturerData, setLecturerData] = useState({ email: "", password: "" });
+  const [studentData, setStudentData] = useState({ studentId: "", password: "" });
+  const [lecturerData, setLecturerData] = useState({ lecturerId: "", password: "" });
 
   const handleStudentChange = (e: ChangeEvent<HTMLInputElement>) => {
     setStudentData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -23,22 +23,46 @@ export default function Login() {
   const handleStudentSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // TODO: Implement actual backend login for student
-      console.log("Login Student", studentData);
+      const response = await fetch("http://localhost:3000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...studentData, role: 'student' }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.message || "Login failed");
+        return;
+      }
+
+      console.log("Login Student success");
       navigate("/home");
     } catch (error) {
       console.error(error);
+      alert("Something went wrong");
     }
   };
 
   const handleLecturerSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      // TODO: Implement actual backend login for lecturer
-      console.log("Login Lecturer", lecturerData);
+      const response = await fetch("http://localhost:3000/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...lecturerData, role: 'lecturer' }),
+      });
+      
+      if (!response.ok) {
+        const error = await response.json();
+        alert(error.message || "Login failed");
+        return;
+      }
+
+      console.log("Login Lecturer success");
       navigate("/home");
     } catch (error) {
       console.error(error);
+      alert("Something went wrong");
     }
   };
 
@@ -69,13 +93,13 @@ export default function Login() {
             <TabsContent value="student">
               <form onSubmit={handleStudentSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="student-email" className="font-normal text-slate-600">Email Address</Label>
+                  <Label htmlFor="studentId" className="font-normal text-slate-600">Student ID</Label>
                   <Input
-                    id="student-email"
-                    type="email"
-                    name="email"
-                    placeholder="student@example.com"
-                    value={studentData.email}
+                    id="studentId"
+                    type="text"
+                    name="studentId"
+                    placeholder="Enter Student ID"
+                    value={studentData.studentId}
                     onChange={handleStudentChange}
                     required
                     className="border-slate-200 focus-visible:ring-blue-500"
@@ -103,13 +127,13 @@ export default function Login() {
             <TabsContent value="lecturer">
               <form onSubmit={handleLecturerSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="lecturer-email" className="font-normal text-slate-600">Email Address</Label>
+                  <Label htmlFor="lecturerId" className="font-normal text-slate-600">Lecturer ID</Label>
                   <Input
-                    id="lecturer-email"
-                    type="email"
-                    name="email"
-                    placeholder="lecturer@example.com"
-                    value={lecturerData.email}
+                    id="lecturerId"
+                    type="text"
+                    name="lecturerId"
+                    placeholder="Enter Lecturer ID"
+                    value={lecturerData.lecturerId}
                     onChange={handleLecturerChange}
                     required
                     className="border-slate-200 focus-visible:ring-blue-500"
