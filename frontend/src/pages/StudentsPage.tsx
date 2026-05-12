@@ -15,12 +15,20 @@ export default function StudentsPage() {
             Authorization: `Bearer ${token}`
           }
         });
+        
+        console.log("Students Fetch Response Status:", response.status);
+        
+        const text = await response.text();
+        console.log("Students Fetch Raw Text:", text);
+
         if (response.ok) {
-          const data = await response.json();
+          const data = JSON.parse(text);
           setStudents(data);
+        } else {
+           console.error("Fetch failed with status:", response.status, "text:", text);
         }
       } catch (error) {
-        console.error("Failed to fetch students:", error);
+        console.error("Failed to fetch students error:", error);
       }
     };
     if (token) fetchStudents();
