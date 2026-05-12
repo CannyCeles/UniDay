@@ -17,7 +17,39 @@ export class ClassSessionService {
     });
   }
 
-  async findAll() {
+  async findAll(user?: any) {
+    if (user && user.role === 'student') {
+      return this.prisma.classSession.findMany({
+        where: {
+          course: {
+            enrollments: {
+              some: {
+                studentId: user.userId
+              }
+            }
+          }
+        },
+        include: {
+          course: true,
+          attendances: true,
+        }
+      });
+    }
+
+    if (user && user.role === 'lecturer') {
+      return this.prisma.classSession.findMany({
+        where: {
+          course: {
+            lecturerId: user.userId
+          }
+        },
+        include: {
+          course: true,
+          attendances: true,
+        }
+      });
+    }
+
     return this.prisma.classSession.findMany({
       include: {
         course: true,

@@ -18,11 +18,11 @@ export default function HomePage() {
 
   const [classSessions, setClassSessions] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
+  const [enrolledCourseIds, setEnrolledCourseIds] = useState<number[]>([]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     
-    // Fetch class sessions
     const fetchClassSessions = async () => {
       try {
         const response = await fetch("http://localhost:3000/class-session", {
@@ -55,8 +55,27 @@ export default function HomePage() {
       }
     };
 
+    const fetchEnrolledCourses = async () => {
+      if (user?.role === 'student') {
+        try {
+          const response = await fetch(`http://localhost:3000/enrollment/student/${user?.userId || user?.id}`, {
+            headers: {
+              Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
+            }
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setEnrolledCourseIds(data.map((course: any) => course.id));
+          }
+        } catch (error) {
+          console.error("Error fetching enrolled courses:", error);
+        }
+      }
+    };
+
     fetchClassSessions();
     fetchCourses();
+    fetchEnrolledCourses();
 
     return () => clearInterval(timer);
   }, [user?.token]);
@@ -97,7 +116,7 @@ export default function HomePage() {
           </div>
           <Link to="/profile">
             <Avatar className="h-8 w-8 border border-slate-200 dark:border-slate-700 cursor-pointer hover:ring-2 hover:ring-[#009FE3] transition-all">
-              <AvatarImage src="" />
+              <AvatarImage src={user?.avatarUrl ? (user.avatarUrl.startsWith('http') ? user.avatarUrl : `http://localhost:3000${user.avatarUrl}`) : ""} className="object-cover" />
               <AvatarFallback className="bg-[#009FE3] text-white text-xs">
                 {fullName.substring(0, 2).toUpperCase()}
               </AvatarFallback>
@@ -164,7 +183,7 @@ export default function HomePage() {
                       return (
                         <div key={session.id} className="p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
                           <div>
-                            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{session.course?.courseName || "Unknown Course"}</h3>
+                            <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{session.course?.name || "Unknown Course"}</h3>
                             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{session.course?.courseCode} • {session.isOnline ? "Online" : session.classroom}</p>
                           </div>
                           <div className="text-right flex flex-col items-end">
@@ -189,7 +208,7 @@ export default function HomePage() {
                         <div className="grid grid-cols-1 gap-4">
                           {courses.map(course => (
                             <Card key={course.id} className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-md p-4 flex flex-col">
-                              <h3 className="text-lg font-semibold">{course.courseName}</h3>
+                              <h3 className="text-lg font-semibold">{course.name}</h3>
                               <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{course.courseCode} • {course.credits} Credits</p>
                               <div className="mt-4 flex flex-col gap-2">
                                 {(course.classSessions && course.classSessions.length > 0) ? (
@@ -209,12 +228,65 @@ export default function HomePage() {
                       )}
                     </div>
                   ) : (
-                    <>
-                      <p className="text-slate-500 dark:text-slate-400 py-12">Registration opens next week.</p>
-                      <Button variant="outline" className="mx-auto bg-[#009FE3] text-white border-transparent hover:bg-[#008bc6] hover:text-white mt-4 w-fit">
-                        View Course Catalog
-                      </Button>
-                    </>
+                    <div className="text-left w-full h-full pb-4">
+                      <h2 className="text-xl pl-2 mb-4 font-semibold text-slate-800 dark:text-slate-100 text-left">Available Courses</h2>
+                      {courses.length === 0 ? (
+                        <p className="text-center text-slate-500 py-4">No courses available.</p>
+                      ) : (
+                        <div className="grid grid-cols-1 gap-4">
+                          {courses.map(course => (
+                            <Card key={course.id} className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-md p-4 flex flex-col hover:border-[#009FE3] transition-colors">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h3 className="text-lg font-semibold">{course.name}</h3>
+                                  <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{course.courseCode} • {course.credits || 3} Credits</p>
+                                </div>
+                                {enrolledCourseIds.includes(course.id) ? (
+                                  <Button 
+                                    variant="outline" 
+                                    className="bg-slate-300 text-slate-600 border-transparent cursor-default hover:bg-slate-300 hover:text-slate-600"
+                                    disabled
+                                  >
+                                    Enrolled
+                                  </Button>
+                                ) : (
+                                  <Button 
+                                    variant="outline" 
+                                    className="bg-[#009FE3] text-white border-transparent hover:bg-[#008bc6] hover:text-white"
+                                    onClick={async () => {
+                                      try {
+                                        const response = await fetch("http://localhost:3000/enrollment", {
+                                          method: "POST",
+                                          headers: {
+                                            "Content-Type": "application/json",
+                                            Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
+                                          },
+                                          body: JSON.stringify({
+                                            studentId: Number(user?.userId || user?.id),
+                                            courseId: Number(course.id)
+                                          })
+                                        });
+                                        if (response.ok) {
+                                          console.log(`Enrolled in ${course.name}`);
+                                          setEnrolledCourseIds([...enrolledCourseIds, course.id]);
+                                        } else {
+                                          const err = await response.json();
+                                          console.error("Enrollment failed", err);
+                                        }
+                                      } catch (e) {
+                                        console.error(e);
+                                      }
+                                    }}
+                                  >
+                                    Enroll
+                                  </Button>
+                                )}
+                              </div>
+                            </Card>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               </TabsContent>
@@ -233,22 +305,28 @@ export default function HomePage() {
               <ul className="space-y-5">
                 <li>
                   <Link to="/profile" className="flex items-center gap-3 group">
-                    <div className="h-4 w-4 rounded-full border-2 border-slate-300 dark:border-slate-600 group-hover:border-[#009FE3] transition-colors"></div>
-                    <span className="text-slate-600 dark:text-slate-300 font-medium group-hover:text-[#009FE3] transition-colors">Upload profile photo</span>
+                    <div className={`h-4 w-4 rounded-full border-2 transition-colors flex items-center justify-center ${user?.avatarUrl ? 'bg-[#009FE3] border-[#009FE3]' : 'border-slate-300 dark:border-slate-600 group-hover:border-[#009FE3]'}`}>
+                      {user?.avatarUrl && <span className="text-white text-xs">✓</span>}
+                    </div>
+                    <span className={`font-medium transition-colors ${user?.avatarUrl ? 'text-[#009FE3] line-through' : 'text-slate-600 dark:text-slate-300 group-hover:text-[#009FE3]'}`}>Upload profile photo</span>
                   </Link>
                 </li>
                 {user?.role === 'lecturer' ? (
                   <li>
                     <Link to="/courses" className="flex items-center gap-3 group">
-                      <div className="h-4 w-4 rounded-full border-2 border-slate-300 dark:border-slate-600 group-hover:border-[#009FE3] transition-colors"></div>
-                      <span className="text-slate-600 dark:text-slate-300 font-medium group-hover:text-[#009FE3] transition-colors">Create class sessions</span>
+                      <div className={`h-4 w-4 rounded-full border-2 transition-colors flex items-center justify-center ${courses.length > 0 ? 'bg-[#009FE3] border-[#009FE3]' : 'border-slate-300 dark:border-slate-600 group-hover:border-[#009FE3]'}`}>
+                        {courses.length > 0 && <span className="text-white text-xs">✓</span>}
+                      </div>
+                      <span className={`font-medium transition-colors ${courses.length > 0 ? 'text-[#009FE3] line-through' : 'text-slate-600 dark:text-slate-300 group-hover:text-[#009FE3]'}`}>Create class sessions</span>
                     </Link>
                   </li>
                 ) : (
                   <li>
                     <Link to="/courses" className="flex items-center gap-3 group">
-                      <div className="h-4 w-4 rounded-full border-2 border-slate-300 dark:border-slate-600 group-hover:border-[#009FE3] transition-colors"></div>
-                      <span className="text-slate-600 dark:text-slate-300 font-medium group-hover:text-[#009FE3] transition-colors">Enroll in new course</span>
+                      <div className={`h-4 w-4 rounded-full border-2 transition-colors flex items-center justify-center ${enrolledCourseIds.length > 0 ? 'bg-[#009FE3] border-[#009FE3]' : 'border-slate-300 dark:border-slate-600 group-hover:border-[#009FE3]'}`}>
+                        {enrolledCourseIds.length > 0 && <span className="text-white text-xs">✓</span>}
+                      </div>
+                      <span className={`font-medium transition-colors ${enrolledCourseIds.length > 0 ? 'text-[#009FE3] line-through' : 'text-slate-600 dark:text-slate-300 group-hover:text-[#009FE3]'}`}>Enroll in new course</span>
                     </Link>
                   </li>
                 )}

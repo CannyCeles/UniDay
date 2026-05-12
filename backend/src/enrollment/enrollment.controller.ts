@@ -19,6 +19,11 @@ export class EnrollmentController {
     return this.enrollmentService.findAll();
   }
 
+  @Get('student/:id')
+  findByStudent(@Param('id') id: string) {
+    return this.enrollmentService.findByStudent(+id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.enrollmentService.findOne(+id);

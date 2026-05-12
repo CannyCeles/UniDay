@@ -21,7 +21,10 @@ export default function CoursesPage() {
 
   const fetchCourses = async () => {
     try {
-      const response = await fetch("http://localhost:3000/course", {
+      const url = isLecturer 
+        ? "http://localhost:3000/course" 
+        : `http://localhost:3000/enrollment/student/${user?.id}`;
+      const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
         }
@@ -59,24 +62,22 @@ export default function CoursesPage() {
       });
 
       if (response.ok) {
-        alert("Course created successfully!");
+        console.log("Course created successfully!");
         setNewCourseDetails({ name: "", courseCode: "" });
         closeCreateDialog();
         fetchCourses();
       } else {
         const err = await response.text();
-        alert(`Failed to create course: ${err}`);
+        console.error(`Failed to create course: ${err}`);
       }
     } catch (error) {
-      console.error(error);
-      alert("An error occurred while creating the course");
+      console.error("An error occurred while creating the course", error);
     }
   };
 
   const handleCreateSession = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Parse start and end time from the selected slot
     const [startHm, endHm] = sessionTime.split(" - ");
     const startTime = new Date(`${sessionDate}T${startHm}:00`).toISOString();
     const endTime = new Date(`${sessionDate}T${endHm}:00`).toISOString();
@@ -98,15 +99,14 @@ export default function CoursesPage() {
       });
 
       if (response.ok) {
-        alert(`Successfully scheduled Class Session for ${selectedCourse.name} on ${sessionDate} at ${sessionTime}`);
-        setSelectedCourse(null);
+        console.log(`Successfully scheduled Class Session for ${selectedCourse.name} on ${sessionDate} at ${sessionTime}`);
+        closeDialog();
       } else {
         const err = await response.text();
-        alert(`Failed to create session: ${err}`);
+        console.error(`Failed to create session: ${err}`);
       }
     } catch (error) {
-      console.error(error);
-      alert("An error occurred while creating the session");
+      console.error("An error occurred while creating the session", error);
     }
   };
 

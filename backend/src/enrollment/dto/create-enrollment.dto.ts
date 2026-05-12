@@ -9,3 +9,4 @@ export class CreateEnrollmentDto {
   @IsNotEmpty()
   courseId!: number;
 }
+
