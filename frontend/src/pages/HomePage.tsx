@@ -4,16 +4,38 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Clock } from "lucide-react";
+import { useState, useEffect } from "react";
 
 export default function HomePage() {
   const { user } = useAuth();
   const fullName = user?.name || "User";
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formattedTime = currentTime.toLocaleString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true,
+  });
 
   return (
     <div className="flex flex-col w-full gap-6">
       <header className="flex justify-between items-center pb-4 border-b border-gray-200">
         <h1 className="text-3xl items-center font-normal text-slate-700 tracking-tight">Dashboard</h1>
         <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 text-slate-500 bg-slate-50 px-3 py-1.5 rounded-full border border-slate-200">
+            <Clock className="w-4 h-4 text-[#009FE3]" />
+            <span className="text-sm font-medium">{formattedTime}</span>
+          </div>
           <Link to="/profile">
             <Avatar className="h-8 w-8 border border-slate-200 cursor-pointer hover:ring-2 hover:ring-[#009FE3] transition-all">
               <AvatarImage src="" />

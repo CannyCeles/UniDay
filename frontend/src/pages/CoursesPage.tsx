@@ -10,33 +10,69 @@ export default function CoursesPage() {
   const isLecturer = user?.role === "lecturer";
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
 
-  const [sessionDay, setSessionDay] = useState("Monday");
+  const [sessionDate, setSessionDate] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split("T")[0];
+  });
   const [sessionTime, setSessionTime] = useState("07:20 - 09:00");
 
   const closeDialog = () => setSelectedCourse(null);
 
-  const handleCreateSession = (e: React.FormEvent) => {
+  const handleCreateSession = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Creating session for:", selectedCourse.id, sessionDay, sessionTime);
-    alert(`Class Session Scheduled for ${selectedCourse.name} on ${sessionDay} at ${sessionTime}`);
-    setSelectedCourse(null);
+    
+    // Parse start and end time from the selected slot
+    const [startHm, endHm] = sessionTime.split(" - ");
+    const startTime = new Date(`${sessionDate}T${startHm}:00`).toISOString();
+    const endTime = new Date(`${sessionDate}T${endHm}:00`).toISOString();
+
+    console.log("Creating session for:", selectedCourse.id, sessionDate, sessionTime);
+    
+    try {
+      const response = await fetch("http://localhost:3000/class-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({
+          courseId: selectedCourse.id,
+          startTime: startTime,
+          endTime: endTime
+        })
+      });
+
+      if (response.ok) {
+        alert(`Successfully scheduled Class Session for ${selectedCourse.name} on ${sessionDate} at ${sessionTime}`);
+        setSelectedCourse(null);
+      } else {
+        const err = await response.text();
+        alert(`Failed to create session: ${err}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred while creating the session");
+    }
   };
 
   const courses = [
     {
-      id: "COMP6100001",
+      id: 1,
+      code: "COMP6100001",
       name: "Software Engineering",
       type: "LAB",
       credits: 4,
     },
     {
-      id: "COMP6083001",
+      id: 2,
+      code: "COMP6083001",
       name: "Database Systems",
       type: "LEC",
       credits: 3,
     },
     {
-      id: "COMP6065001",
+      id: 3,
+      code: "COMP6065001",
       name: "Artificial Intelligence",
       type: "LEC",
       credits: 4,
@@ -70,7 +106,7 @@ export default function CoursesPage() {
                   {course.type}
                 </Badge>
               </div>
-              <CardDescription className="text-sm font-mono text-slate-500">{course.id}</CardDescription>
+              <CardDescription className="text-sm font-mono text-slate-500">{course.code}</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-slate-600 font-medium">{course.credits} Credits</p>
@@ -102,20 +138,15 @@ export default function CoursesPage() {
               <form onSubmit={handleCreateSession} className="space-y-5">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-[#009FE3]" /> Select Day
+                    <Calendar className="w-4 h-4 text-[#009FE3]" /> Select Date
                   </label>
-                  <select 
+                  <input 
+                    type="date"
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                    value={sessionDay}
-                    onChange={(e) => setSessionDay(e.target.value)}
-                  >
-                    <option value="Monday">Monday</option>
-                    <option value="Tuesday">Tuesday</option>
-                    <option value="Wednesday">Wednesday</option>
-                    <option value="Thursday">Thursday</option>
-                    <option value="Friday">Friday</option>
-                    <option value="Saturday">Saturday</option>
-                  </select>
+                    value={sessionDate}
+                    onChange={(e) => setSessionDate(e.target.value)}
+                    required
+                  />
                 </div>
                 
                 <div className="space-y-2">
