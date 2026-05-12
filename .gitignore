@@ -13,3 +13,4 @@ backend/generated/prisma/
 *.txt
 *.md
 exampleFrontEnd
+uploads

@@ -22,7 +22,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="flex flex-col h-full bg-[#0373fc] text-white border-r border-blue-600">
+    <div className="flex flex-col h-full bg-[#0373fc] dark:bg-slate-900 text-white border-r border-blue-600 dark:border-slate-800">
       <div className="p-6 pb-2">
         <div className="bg-white/10 rounded-md p-4 mb-4 border border-white/20">
           <h3 className="font-semibold text-lg text-white capitalize">{user?.role || 'Guest'}</h3>

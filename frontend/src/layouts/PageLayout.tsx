@@ -3,7 +3,7 @@ import Sidebar from "@/components/SideBar";
 
 export default function PageLayout() {
   return (
-    <div className="flex h-screen w-full bg-[#f4f5f7] text-slate-800 font-sans">
+    <div className="flex h-screen w-full bg-[#f4f5f7] dark:bg-slate-950 text-slate-800 dark:text-slate-50 font-sans">
       <aside className="w-64 flex-shrink-0 shadow-md z-10 relative">
         <Sidebar />
       </aside>
