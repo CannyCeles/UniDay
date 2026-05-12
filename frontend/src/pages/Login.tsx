@@ -33,7 +33,7 @@ export default function Login() {
       
       if (!response.ok) {
         const error = await response.json();
-        alert(error.message || "Login failed");
+        console.error(error.message || "Login failed");
         return;
       }
 
@@ -42,8 +42,7 @@ export default function Login() {
       console.log("Login Student success");
       navigate("/home");
     } catch (error) {
-      console.error(error);
-      alert("Something went wrong");
+      console.error("Something went wrong", error);
     }
   };
 
@@ -58,7 +57,7 @@ export default function Login() {
       
       if (!response.ok) {
         const error = await response.json();
-        alert(error.message || "Login failed");
+        console.error(error.message || "Login failed");
         return;
       }
 
@@ -67,30 +66,29 @@ export default function Login() {
       console.log("Login Lecturer success");
       navigate("/home");
     } catch (error) {
-      console.error(error);
-      alert("Something went wrong");
+      console.error("Something went wrong", error);
     }
   };
 
   return (
-    <div className="flex min-h-screen w-full items-center justify-center bg-sky-50 text-slate-800 py-12 font-sans">
-      <Card className="w-[420px] shadow-sm border border-slate-200 bg-white rounded-md">
+    <div className="flex min-h-screen w-full items-center justify-center bg-sky-50 dark:bg-slate-950 text-slate-800 dark:text-white py-12 font-sans">
+      <Card className="w-[420px] shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-md">
         <CardHeader className="text-center pb-6">
-          <CardTitle className="text-2xl font-normal text-slate-700 tracking-tight">Welcome Back</CardTitle>
-          <CardDescription className="text-slate-500">Log in to your account</CardDescription>
+          <CardTitle className="text-2xl font-normal text-slate-700 dark:text-slate-100 tracking-tight">Welcome Back</CardTitle>
+          <CardDescription className="text-slate-500 dark:text-slate-400">Log in to your account</CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="student" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6 bg-slate-50 p-1 rounded-md border border-slate-100">
+            <TabsList className="grid w-full grid-cols-2 mb-6 bg-slate-50 dark:bg-slate-800 p-1 rounded-md border border-slate-100 dark:border-slate-700">
               <TabsTrigger 
                 value="student" 
-                className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-sm transition-all"
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:shadow-sm rounded-sm transition-all"
               >
                 Student
               </TabsTrigger>
               <TabsTrigger 
                 value="lecturer" 
-                className="data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-sm rounded-sm transition-all"
+                className="data-[state=active]:bg-white dark:data-[state=active]:bg-slate-900 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:shadow-sm rounded-sm transition-all"
               >
                 Lecturer
               </TabsTrigger>

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { ClassSessionService } from './class-session.service';
 import { CreateClassSessionDto } from './dto/create-class-session.dto';
 import { UpdateClassSessionDto } from './dto/update-class-session.dto';
@@ -15,8 +15,8 @@ export class ClassSessionController {
   }
 
   @Get()
-  findAll() {
-    return this.classSessionService.findAll();
+  findAll(@Req() req: any) {
+    return this.classSessionService.findAll(req.user);
   }
 
   @Get(':id')

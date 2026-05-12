@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, UploadedFile, Req } from '@nestjs/common';
 import { BiometricService } from './biometric.service';
 import { CreateBiometricDto } from './dto/create-biometric.dto';
 import { UpdateBiometricDto } from './dto/update-biometric.dto';
@@ -23,12 +23,15 @@ export class BiometricController {
       }
     })
   }))
-  uploadProfilePhoto(@UploadedFile() file: Express.Multer.File) {
-    // You would typically save `file.filename` to the user's database record here
+  async uploadProfilePhoto(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
+    const user = req.user;
+    const { avatarUrl } = await this.biometricService.updateAvatar(user.userId, user.role, file.filename);
+    
     return {
       message: 'Profile photo uploaded successfully',
       filename: file.filename,
-      path: file.path
+      path: file.path,
+      avatarUrl
     };
   }
 

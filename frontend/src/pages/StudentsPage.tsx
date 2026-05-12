@@ -36,27 +36,27 @@ export default function StudentsPage() {
 
   return (
     <div className="flex flex-col w-full gap-6">
-      <header className="flex justify-between items-center pb-4 border-b border-gray-200">
+      <header className="flex justify-between items-center pb-4 border-b border-gray-200 dark:border-slate-800">
         <div>
-          <h1 className="text-3xl items-center font-normal text-slate-700 tracking-tight">Students</h1>
-          <p className="text-slate-500 mt-1">Directory of all registered students.</p>
+          <h1 className="text-3xl items-center font-normal text-slate-700 dark:text-slate-100 tracking-tight">Students</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1">Directory of all registered students.</p>
         </div>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {students.map((student) => (
-          <Card key={student.id} className="shadow-sm border border-slate-200 bg-white rounded-md">
+          <Card key={student.id} className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-md">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
-                <CardTitle className="text-lg font-semibold text-slate-800">{student.name}</CardTitle>
-                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-100">{student.name}</CardTitle>
+                <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50">
                   Active
                 </Badge>
               </div>
-              <CardDescription className="text-sm font-mono text-[#009FE3]">{student.studentId}</CardDescription>
+              <CardDescription className="text-sm font-mono text-[#009FE3] dark:text-[#33bbf2]">{student.studentId}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-slate-600 font-medium">BINUS University</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">BINUS University</p>
             </CardContent>
           </Card>
         ))}

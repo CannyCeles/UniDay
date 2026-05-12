@@ -14,6 +14,7 @@ model Student {
   name             String
   email            String            @unique
   password         String
+  avatarUrl        String?
   biometricProfile BiometricProfile?
   attendances      AttendanceRecord[]
   enrollments      Enrollment[]
@@ -25,6 +26,7 @@ model Lecturer {
   name       String
   email      String    @unique
   password   String
+  avatarUrl  String?
   courses    Course[]
 }
 

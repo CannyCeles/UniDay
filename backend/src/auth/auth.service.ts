@@ -88,7 +88,8 @@ export class AuthService {
         name: user.name,
         email: user.email,
         userId: userId,
-        role: dto.role
+        role: dto.role,
+        avatarUrl: user.avatarUrl
       }
     };
   }

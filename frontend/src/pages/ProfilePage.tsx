@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { User, Mail, GraduationCap, Building, IdCard } from "lucide-react";
 
 export default function ProfilePage() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   
   console.log("ProfilePage -> current user from AuthContext:", user);
 
@@ -31,14 +31,16 @@ export default function ProfilePage() {
 
       if (response.ok) {
         const data = await response.json();
-        alert("Photo uploaded successfully!");
         console.log("Uploaded file response:", data);
+        if (data.avatarUrl) {
+          updateUser({ avatarUrl: data.avatarUrl });
+          console.log("Profile updated successfully");
+        }
       } else {
-        alert("Failed to upload photo.");
+        console.error("Failed to upload photo.");
       }
     } catch (error) {
       console.error("Upload error:", error);
-      alert("Error uploading photo.");
     }
   };
 
@@ -52,7 +54,7 @@ export default function ProfilePage() {
         <Card className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-md md:col-span-1 border-t-4 border-t-[#009FE3] dark:border-t-[#009FE3]">
           <CardContent className="pt-8 flex flex-col items-center justify-center text-center">
             <Avatar className="h-32 w-32 mb-4 border-4 border-white dark:border-slate-800 shadow-sm">
-              <AvatarImage src="" />
+              <AvatarImage src={user?.avatarUrl ? (user.avatarUrl.startsWith('http') ? user.avatarUrl : `http://localhost:3000${user.avatarUrl}`) : ""} className="object-cover" />
               <AvatarFallback className="bg-[#009FE3] text-white text-4xl">
                 {fullName.substring(0, 2).toUpperCase()}
               </AvatarFallback>
