@@ -1,13 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { CreateClassSessionDto } from './dto/create-class-session.dto';
+import { UpdateClassSessionDto } from './dto/update-class-session.dto';
 
 @Injectable()
 export class ClassSessionService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createClassSessionDto: any) {
+  async create(createClassSessionDto: CreateClassSessionDto) {
     return this.prisma.classSession.create({
-      data: createClassSessionDto,
+      data: {
+        ...createClassSessionDto,
+        startTime: new Date(createClassSessionDto.startTime),
+        endTime: new Date(createClassSessionDto.endTime),
+      },
     });
   }
 
@@ -30,10 +36,18 @@ export class ClassSessionService {
     });
   }
 
-  async update(id: number, updateClassSessionDto: any) {
+  async update(id: number, updateClassSessionDto: UpdateClassSessionDto) {
+    const data: any = { ...updateClassSessionDto };
+    if (updateClassSessionDto.startTime) {
+      data.startTime = new Date(updateClassSessionDto.startTime);
+    }
+    if (updateClassSessionDto.endTime) {
+      data.endTime = new Date(updateClassSessionDto.endTime);
+    }
+
     return this.prisma.classSession.update({
       where: { id },
-      data: updateClassSessionDto,
+      data,
     });
   }
 

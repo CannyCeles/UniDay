@@ -2,13 +2,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
-import { Calendar, Clock, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Calendar, Clock, X, Plus } from "lucide-react";
 
 export default function CoursesPage() {
   const { user } = useAuth();
   const isLecturer = user?.role === "lecturer";
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [isCreatingCourse, setIsCreatingCourse] = useState(false);
+  const [newCourseDetails, setNewCourseDetails] = useState({ name: "", courseCode: "" });
 
   const [sessionDate, setSessionDate] = useState(() => {
     const today = new Date();
@@ -16,7 +19,59 @@ export default function CoursesPage() {
   });
   const [sessionTime, setSessionTime] = useState("07:20 - 09:00");
 
+  const fetchCourses = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/course", {
+        headers: {
+          Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setCourses(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch courses:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourses();
+  }, [user]);
+
   const closeDialog = () => setSelectedCourse(null);
+  const closeCreateDialog = () => setIsCreatingCourse(false);
+
+  const handleCreateCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:3000/course", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
+        },
+        body: JSON.stringify({
+          name: newCourseDetails.name,
+          courseCode: newCourseDetails.courseCode,
+          lecturerId: user?.id,
+        })
+      });
+
+      if (response.ok) {
+        alert("Course created successfully!");
+        setNewCourseDetails({ name: "", courseCode: "" });
+        closeCreateDialog();
+        fetchCourses();
+      } else {
+        const err = await response.text();
+        alert(`Failed to create course: ${err}`);
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An error occurred while creating the course");
+    }
+  };
 
   const handleCreateSession = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,41 +110,22 @@ export default function CoursesPage() {
     }
   };
 
-  const courses = [
-    {
-      id: 1,
-      code: "COMP6100001",
-      name: "Software Engineering",
-      type: "LAB",
-      credits: 4,
-    },
-    {
-      id: 2,
-      code: "COMP6083001",
-      name: "Database Systems",
-      type: "LEC",
-      credits: 3,
-    },
-    {
-      id: 3,
-      code: "COMP6065001",
-      name: "Artificial Intelligence",
-      type: "LEC",
-      credits: 4,
-    }
-  ];
-
   return (
     <div className="flex flex-col w-full gap-6 relative">
-      <header className="flex justify-between items-center pb-4 border-b border-gray-200">
+      <header className="flex justify-between items-center pb-4 border-b border-gray-200 dark:border-slate-800">
         <div>
-          <h1 className="text-3xl items-center font-normal text-slate-700 tracking-tight">
+          <h1 className="text-3xl items-center font-normal text-slate-700 dark:text-slate-100 tracking-tight">
             {isLecturer ? "All Courses" : "My Enrolled Courses"}
           </h1>
-          <p className="text-slate-500 mt-1">
+          <p className="text-slate-500 dark:text-slate-400 mt-1">
             {isLecturer ? "Select a course to schedule a class session." : "Displaying all currently enrolled courses."}
           </p>
         </div>
+        {isLecturer && (
+          <Button onClick={() => setIsCreatingCourse(true)} className="bg-[#009FE3] hover:bg-[#008bc6] flex items-center gap-2">
+            <Plus className="w-4 h-4" /> Create Course
+          </Button>
+        )}
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -97,21 +133,21 @@ export default function CoursesPage() {
           <Card 
             key={course.id} 
             onClick={() => isLecturer && setSelectedCourse(course)}
-            className={`shadow-sm border border-slate-200 bg-white rounded-md transition-all ${isLecturer ? 'cursor-pointer hover:border-[#009FE3] hover:shadow-md' : ''}`}
+            className={`shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-md transition-all ${isLecturer ? 'cursor-pointer hover:border-[#009FE3] dark:hover:border-[#009FE3] hover:shadow-md' : ''}`}
           >
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
-                <CardTitle className="text-lg font-semibold text-slate-800">{course.name}</CardTitle>
-                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-                  {course.type}
+                <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-100">{course.name}</CardTitle>
+                <Badge variant="outline" className="bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800">
+                  {course.type || "LEC"}
                 </Badge>
               </div>
-              <CardDescription className="text-sm font-mono text-slate-500">{course.code}</CardDescription>
+              <CardDescription className="text-sm font-mono text-slate-500 dark:text-slate-400">{course.courseCode}</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-slate-600 font-medium">{course.credits} Credits</p>
+              <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">{course.credits || 3} Credits</p>
               {isLecturer && (
-                <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-sm text-[#009FE3] font-medium">
+                <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-sm text-[#009FE3] font-medium">
                   <span>Create Class Session &rarr;</span>
                 </div>
               )}
@@ -120,29 +156,79 @@ export default function CoursesPage() {
         ))}
       </div>
 
-      {selectedCourse && isLecturer && (
+      {isCreatingCourse && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-          <Card className="w-full max-w-md bg-white shadow-lg animate-in fade-in zoom-in duration-200">
-            <CardHeader className="flex flex-row items-start justify-between border-b pb-4">
+          <Card className="w-full max-w-md bg-white dark:bg-slate-900 shadow-lg animate-in fade-in zoom-in duration-200 border-slate-200 dark:border-slate-800">
+            <CardHeader className="flex flex-row items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
               <div>
-                <CardTitle className="text-xl text-slate-800">Assign Class Session</CardTitle>
-                <CardDescription className="mt-1">
-                  Schedule details for <span className="font-semibold text-slate-700">{selectedCourse.name}</span>
+                <CardTitle className="text-xl text-slate-800 dark:text-slate-100">Create New Course</CardTitle>
+                <CardDescription className="mt-1 dark:text-slate-400">
+                  Add a new course to the database.
                 </CardDescription>
               </div>
-              <Button variant="ghost" size="icon" onClick={closeDialog} className="h-8 w-8 rounded-full">
+              <Button variant="ghost" size="icon" onClick={closeCreateDialog} className="h-8 w-8 rounded-full dark:hover:bg-slate-800 dark:text-slate-400">
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <form onSubmit={handleCreateCourse} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Course Code</label>
+                  <input 
+                    type="text"
+                    className="flex h-10 w-full rounded-md border border-input dark:border-slate-700 bg-background dark:bg-slate-800 px-3 py-2 text-sm dark:text-slate-100 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009FE3] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={newCourseDetails.courseCode}
+                    onChange={(e) => setNewCourseDetails({ ...newCourseDetails, courseCode: e.target.value })}
+                    required
+                    placeholder="e.g. COMP6083001"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Course Name</label>
+                  <input 
+                    type="text"
+                    className="flex h-10 w-full rounded-md border border-input dark:border-slate-700 bg-background dark:bg-slate-800 px-3 py-2 text-sm dark:text-slate-100 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground dark:placeholder:text-slate-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009FE3] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    value={newCourseDetails.name}
+                    onChange={(e) => setNewCourseDetails({ ...newCourseDetails, name: e.target.value })}
+                    required
+                    placeholder="e.g. Database Systems"
+                  />
+                </div>
+
+                <div className="pt-4 flex justify-end gap-3">
+                  <Button type="button" variant="outline" onClick={closeCreateDialog} className="dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Cancel</Button>
+                  <Button type="submit" className="bg-[#009FE3] hover:bg-[#008bc6] text-white">Create Course</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {selectedCourse && isLecturer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <Card className="w-full max-w-md bg-white dark:bg-slate-900 shadow-lg animate-in fade-in zoom-in duration-200 border-slate-200 dark:border-slate-800">
+            <CardHeader className="flex flex-row items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
+              <div>
+                <CardTitle className="text-xl text-slate-800 dark:text-slate-100">Assign Class Session</CardTitle>
+                <CardDescription className="mt-1 dark:text-slate-400">
+                  Schedule details for <span className="font-semibold text-slate-700 dark:text-slate-200">{selectedCourse.name}</span>
+                </CardDescription>
+              </div>
+              <Button variant="ghost" size="icon" onClick={closeDialog} className="h-8 w-8 rounded-full dark:hover:bg-slate-800 dark:text-slate-400">
                 <X className="h-4 w-4" />
               </Button>
             </CardHeader>
             <CardContent className="pt-6">
               <form onSubmit={handleCreateSession} className="space-y-5">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-[#009FE3]" /> Select Date
                   </label>
                   <input 
                     type="date"
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-md border border-input dark:border-slate-700 bg-background dark:bg-slate-800 px-3 py-2 text-sm dark:text-slate-100 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009FE3] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     value={sessionDate}
                     onChange={(e) => setSessionDate(e.target.value)}
                     required
@@ -150,11 +236,11 @@ export default function CoursesPage() {
                 </div>
                 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                  <label className="text-sm font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[#009FE3]" /> Select Time Slot
                   </label>
                   <select 
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="flex h-10 w-full rounded-md border border-input dark:border-slate-700 bg-background dark:bg-slate-800 px-3 py-2 text-sm dark:text-slate-100 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#009FE3] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     value={sessionTime}
                     onChange={(e) => setSessionTime(e.target.value)}
                   >
@@ -167,8 +253,8 @@ export default function CoursesPage() {
                 </div>
 
                 <div className="pt-4 flex justify-end gap-3">
-                  <Button type="button" variant="outline" onClick={closeDialog}>Cancel</Button>
-                  <Button type="submit" className="bg-[#009FE3] hover:bg-[#008bc6]">Create Session</Button>
+                  <Button type="button" variant="outline" onClick={closeDialog} className="dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800">Cancel</Button>
+                  <Button type="submit" className="bg-[#009FE3] hover:bg-[#008bc6] text-white">Create Session</Button>
                 </div>
               </form>
             </CardContent>
