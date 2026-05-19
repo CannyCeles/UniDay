@@ -25,6 +25,7 @@ export default function ProfilePage() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [displayDims, setDisplayDims] = useState({ w: 256, h: 256 });
   const [isUploading, setIsUploading] = useState(false);
+  const [isTestingVerification, setIsTestingVerification] = useState(false);
 
   useEffect(() => {
     if (isWebcamOpen && webcamStream && videoRef.current) {
@@ -32,17 +33,25 @@ export default function ProfilePage() {
     }
   }, [isWebcamOpen, webcamStream]);
 
-  const startWebcam = async () => {
+  const startWebcam = () => {
     console.log("startWebcam -> Requesting webcam access");
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
-      console.log("startWebcam -> Access granted, assigning stream");
-      setWebcamStream(stream);
-      setIsWebcamOpen(true);
-    } catch (error) {
-      console.error("startWebcam -> Failed to open webcam:", error);
-      alert("Could not access your camera. Please ensure permissions are granted.");
-    }
+    navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } })
+      .then((stream) => {
+        console.log("startWebcam -> Access granted, assigning stream");
+        setWebcamStream(stream);
+        setIsWebcamOpen(true);
+      })
+      .catch((error) => {
+        console.error("startWebcam -> Failed to open webcam:", error);
+        alert("Could not access your camera. Please ensure permissions are granted.");
+        setIsTestingVerification(false);
+      });
+  };
+
+  const startTestingVerification = () => {
+    console.log("startTestingVerification -> Activating webcam for testing match");
+    setIsTestingVerification(true);
+    startWebcam();
   };
 
   const stopWebcam = () => {
@@ -214,6 +223,80 @@ export default function ProfilePage() {
     img.src = editorImageSrc;
   };
 
+  const handleCropAndVerify = async () => {
+    if (!editorImageSrc) return;
+    console.log("handleCropAndVerify -> Generating high-res verification canvas crop");
+    setIsUploading(true);
+
+    const img = new Image();
+    img.onload = async () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 400;
+      canvas.height = 400;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        const factor = 400 / 256;
+        ctx.clearRect(0, 0, 400, 400);
+        ctx.save();
+        ctx.translate(200, 200);
+        ctx.scale(zoom, zoom);
+        ctx.translate((position.x * factor) / zoom, (position.y * factor) / zoom);
+        ctx.drawImage(
+          img,
+          (-displayDims.w * factor) / 2,
+          (-displayDims.h * factor) / 2,
+          displayDims.w * factor,
+          displayDims.h * factor
+        );
+        ctx.restore();
+
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            console.error("handleCropAndVerify -> Failed to create PNG Blob");
+            setIsUploading(false);
+            return;
+          }
+
+          const file = new File([blob], "verify.png", { type: "image/png" });
+          const formData = new FormData();
+          formData.append("file", file);
+
+          console.log("handleCropAndVerify -> Sending comparison request");
+          try {
+            const response = await fetch("http://localhost:3000/biometric/verify-face", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`,
+              },
+              body: formData,
+            });
+
+            console.log("handleCropAndVerify -> Verification status:", response.status);
+            const data = await response.json();
+            console.log("handleCropAndVerify -> Verification Response payload:", data);
+            
+            if (data.match) {
+              console.log("PHOTOS MATCH! Confidence distance:", data.distance);
+              alert(`MATCH SUCCESS! Similarity Confidence: ${Math.round((1 - data.distance) * 100)}% Match.`);
+            } else {
+              console.log("PHOTOS DO NOT MATCH! Confidence distance:", data.distance);
+              alert(`MATCH FAILED! Photos do not match. Similarity: ${Math.round((1 - data.distance) * 100)}% Match.`);
+            }
+
+            setEditorImageSrc(null);
+          } catch (error) {
+            console.error("handleCropAndVerify -> Network error:", error);
+            alert("An error occurred during verification.");
+          } finally {
+            setIsUploading(false);
+            setIsTestingVerification(false);
+          }
+        }, "image/png");
+      }
+    };
+    img.src = editorImageSrc;
+  };
+
   return (
     <div className="flex flex-col w-full gap-6">
       <header className="pb-4 border-b border-gray-200 dark:border-slate-800">
@@ -292,6 +375,23 @@ export default function ProfilePage() {
                 <p className="text-slate-800 dark:text-slate-200 mt-1 pl-6">BINUS University</p>
               </div>
             </div>
+
+            <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-3">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">AI Face Verification Testing</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Click the button below to test the AI model comparison. It will activate the webcam, capture your face, and match it against your current profile photo.</p>
+              <div>
+                <Button 
+                  onClick={startTestingVerification}
+                  className="bg-[#009FE3] hover:bg-[#008bc6] text-white"
+                  disabled={!user?.avatarUrl}
+                >
+                  Verify Face Against Active Photo
+                </Button>
+                {!user?.avatarUrl && (
+                  <p className="text-xs text-red-500 mt-1.5 font-medium">Please upload a profile photo first to enable AI testing.</p>
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -332,7 +432,7 @@ export default function ProfilePage() {
       {editorImageSrc && (
         <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-800 text-white rounded-xl shadow-2xl p-6 max-w-sm w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-200">
-            <h2 className="text-xl font-bold tracking-tight mb-2 text-slate-100">Crop & Position</h2>
+            <h2 className="text-xl font-bold tracking-tight mb-2 text-slate-100">{isTestingVerification ? "Align & Verify" : "Crop & Position"}</h2>
             <p className="text-xs text-slate-400 mb-6 text-center">Drag the photo to align and use the slider to zoom.</p>
             
             <div 
@@ -376,6 +476,7 @@ export default function ProfilePage() {
                 onClick={() => {
                   console.log("Crop modal -> Exit");
                   setEditorImageSrc(null);
+                  setIsTestingVerification(false);
                 }}
                 variant="outline"
                 className="flex-1 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
@@ -384,11 +485,11 @@ export default function ProfilePage() {
                 Exit
               </Button>
               <Button 
-                onClick={handleCropAndUpload}
+                onClick={isTestingVerification ? handleCropAndVerify : handleCropAndUpload}
                 className="flex-1 bg-[#009FE3] hover:bg-[#008bc6] text-white font-semibold"
                 disabled={isUploading}
               >
-                {isUploading ? "Uploading..." : "Save Photo"}
+                {isUploading ? (isTestingVerification ? "Verifying..." : "Uploading...") : (isTestingVerification ? "Verify" : "Save Photo")}
               </Button>
             </div>
           </div>
