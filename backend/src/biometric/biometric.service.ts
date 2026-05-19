@@ -39,6 +39,8 @@ export class BiometricService {
       'ssd_mobilenetv1_model-weights_manifest.json',
       'ssd_mobilenetv1_model-shard1',
       'ssd_mobilenetv1_model-shard2',
+      'tiny_face_detector_model-weights_manifest.json',
+      'tiny_face_detector_model-shard1',
       'face_landmark_68_model-weights_manifest.json',
       'face_landmark_68_model-shard1',
       'face_recognition_model-weights_manifest.json',
@@ -77,6 +79,7 @@ export class BiometricService {
     faceapiEnv.monkeyPatch({ Canvas: Canvas as any, Image: Image as any, ImageData: ImageData as any });
 
     await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelDir);
+    await faceapi.nets.tinyFaceDetector.loadFromDisk(modelDir);
     await faceapi.nets.faceLandmark68Net.loadFromDisk(modelDir);
     await faceapi.nets.faceRecognitionNet.loadFromDisk(modelDir);
 
@@ -88,7 +91,7 @@ export class BiometricService {
     try {
       const img = await loadImage(imagePath) as any;
       const detection = await faceapi
-        .detectSingleFace(img)
+        .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
         .withFaceDescriptor();
       return detection ? detection.descriptor : null;

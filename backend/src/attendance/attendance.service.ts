@@ -1,26 +1,63 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAttendanceDto } from './dto/create-attendance.dto';
 import { UpdateAttendanceDto } from './dto/update-attendance.dto';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class AttendanceService {
-  create(createAttendanceDto: CreateAttendanceDto) {
-    return 'This action adds a new attendance';
+  constructor(private prisma: PrismaService) {}
+
+  async create(createAttendanceDto: CreateAttendanceDto) {
+    return this.prisma.attendanceRecord.upsert({
+      where: {
+        sessionId_studentId: {
+          sessionId: createAttendanceDto.sessionId,
+          studentId: createAttendanceDto.studentId,
+        },
+      },
+      update: {
+        status: createAttendanceDto.status,
+        matchScore: createAttendanceDto.matchScore,
+        timestamp: new Date(),
+      },
+      create: {
+        sessionId: createAttendanceDto.sessionId,
+        studentId: createAttendanceDto.studentId,
+        status: createAttendanceDto.status,
+        matchScore: createAttendanceDto.matchScore,
+      },
+    });
   }
 
-  findAll() {
-    return `This action returns all attendance`;
+  async findAll() {
+    return this.prisma.attendanceRecord.findMany({
+      include: {
+        student: true,
+        session: true,
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} attendance`;
+  async findOne(id: number) {
+    return this.prisma.attendanceRecord.findUnique({
+      where: { id },
+      include: {
+        student: true,
+        session: true,
+      },
+    });
   }
 
-  update(id: number, updateAttendanceDto: UpdateAttendanceDto) {
-    return `This action updates a #${id} attendance`;
+  async update(id: number, updateAttendanceDto: UpdateAttendanceDto) {
+    return this.prisma.attendanceRecord.update({
+      where: { id },
+      data: updateAttendanceDto as any,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} attendance`;
+  async remove(id: number) {
+    return this.prisma.attendanceRecord.delete({
+      where: { id },
+    });
   }
 }
