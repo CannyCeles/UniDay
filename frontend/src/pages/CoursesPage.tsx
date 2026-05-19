@@ -139,7 +139,7 @@ export default function CoursesPage() {
           <Card 
             key={course.id} 
             onClick={() => isLecturer && setSelectedCourse(course)}
-            className={`shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-md transition-all ${isLecturer ? 'cursor-pointer hover:border-[#009FE3] dark:hover:border-[#009FE3] hover:shadow-md' : ''}`}
+            className={`shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#009FE3] dark:hover:border-[#009FE3] ${isLecturer ? 'cursor-pointer' : ''}`}
           >
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">

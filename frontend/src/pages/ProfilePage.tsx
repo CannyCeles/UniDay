@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { User, Mail, GraduationCap, Building, IdCard } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 
 export default function ProfilePage() {
   const { user, updateUser } = useAuth();
@@ -13,45 +14,204 @@ export default function ProfilePage() {
   const studentId = user?.userId || "N/A";
   const email = user?.email;
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const [editorImageSrc, setEditorImageSrc] = useState<string | null>(null);
+  const [isWebcamOpen, setIsWebcamOpen] = useState(false);
+  const [webcamStream, setWebcamStream] = useState<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
+  const [zoom, setZoom] = useState(1);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [displayDims, setDisplayDims] = useState({ w: 256, h: 256 });
+  const [isUploading, setIsUploading] = useState(false);
+
+  useEffect(() => {
+    if (isWebcamOpen && webcamStream && videoRef.current) {
+      videoRef.current.srcObject = webcamStream;
+    }
+  }, [isWebcamOpen, webcamStream]);
+
+  const startWebcam = async () => {
+    console.log("startWebcam -> Requesting webcam access");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
+      console.log("startWebcam -> Access granted, assigning stream");
+      setWebcamStream(stream);
+      setIsWebcamOpen(true);
+    } catch (error) {
+      console.error("startWebcam -> Failed to open webcam:", error);
+      alert("Could not access your camera. Please ensure permissions are granted.");
+    }
+  };
+
+  const stopWebcam = () => {
+    console.log("stopWebcam -> Stopping camera stream tracks");
+    if (webcamStream) {
+      webcamStream.getTracks().forEach((track) => track.stop());
+      setWebcamStream(null);
+    }
+    setIsWebcamOpen(false);
+  };
+
+  const capturePhoto = () => {
+    console.log("capturePhoto -> Capturing frame from stream");
+    if (videoRef.current) {
+      const video = videoRef.current;
+      const canvas = document.createElement("canvas");
+      canvas.width = 640;
+      canvas.height = 480;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, 640, 480);
+        const dataUrl = canvas.toDataURL("image/png");
+        console.log("capturePhoto -> Frame captured, opening editor");
+        setEditorImageSrc(dataUrl);
+        setZoom(1);
+        setPosition({ x: 0, y: 0 });
+        
+        const img = new Image();
+        img.onload = () => {
+          const aspect = img.width / img.height;
+          let w = 256;
+          let h = 256;
+          if (aspect > 1) {
+            w = 256 * aspect;
+          } else {
+            h = 256 / aspect;
+          }
+          setDisplayDims({ w, h });
+        };
+        img.src = dataUrl;
+      }
+      stopWebcam();
+    }
+  };
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) {
-      console.log("handleFileUpload -> No file selected.");
+      console.log("handleFileSelect -> No file chosen");
       return;
     }
-    console.log("handleFileUpload -> Selected file:", file.name, "type:", file.type, "size:", file.size);
+    console.log("handleFileSelect -> File chosen:", file.name);
 
-    const formData = new FormData();
-    formData.append("file", file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setEditorImageSrc(dataUrl);
+      setZoom(1);
+      setPosition({ x: 0, y: 0 });
 
-    console.log("handleFileUpload -> Sending POST upload request to backend");
-    try {
-      const response = await fetch("http://localhost:3000/biometric/upload-photo", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
-        },
-        body: formData
-      });
-
-      console.log("handleFileUpload -> Upload response status:", response.status);
-      if (response.ok) {
-        const data = await response.json();
-        console.log("handleFileUpload -> Uploaded file response data:", data);
-        if (data.avatarUrl) {
-          console.log("handleFileUpload -> Updating context user with avatarUrl:", data.avatarUrl);
-          updateUser({ avatarUrl: data.avatarUrl });
-          console.log("handleFileUpload -> Profile updated successfully in context and local storage");
+      const img = new Image();
+      img.onload = () => {
+        const aspect = img.width / img.height;
+        let w = 256;
+        let h = 256;
+        if (aspect > 1) {
+          w = 256 * aspect;
         } else {
-          console.error("handleFileUpload -> Response ok, but avatarUrl missing in data:", data);
+          h = 256 / aspect;
         }
-      } else {
-        const errText = await response.text();
-        console.error("handleFileUpload -> Failed to upload photo. Status:", response.status, "body:", errText);
-      }
-    } catch (error) {
-      console.error("handleFileUpload -> Upload network/runtime error:", error);
+        setDisplayDims({ w, h });
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    console.log("handlePointerDown -> Start dragging image");
+    setIsDragging(true);
+    setDragStart({
+      x: e.clientX - position.x,
+      y: e.clientY - position.y,
+    });
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (isDragging) {
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
+      setPosition({ x: newX, y: newY });
     }
+  };
+
+  const handlePointerUp = () => {
+    console.log("handlePointerUp -> Stop dragging image");
+    setIsDragging(false);
+  };
+
+  const handleCropAndUpload = async () => {
+    if (!editorImageSrc) return;
+    console.log("handleCropAndUpload -> Drawing cropped circle on high-res canvas");
+    setIsUploading(true);
+
+    const img = new Image();
+    img.onload = async () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 400;
+      canvas.height = 400;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        const factor = 400 / 256;
+        ctx.clearRect(0, 0, 400, 400);
+        ctx.save();
+        ctx.translate(200, 200);
+        ctx.scale(zoom, zoom);
+        ctx.translate((position.x * factor) / zoom, (position.y * factor) / zoom);
+        ctx.drawImage(
+          img,
+          (-displayDims.w * factor) / 2,
+          (-displayDims.h * factor) / 2,
+          displayDims.w * factor,
+          displayDims.h * factor
+        );
+        ctx.restore();
+
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            console.error("handleCropAndUpload -> Error producing PNG blob");
+            setIsUploading(false);
+            return;
+          }
+
+          const file = new File([blob], "profile.png", { type: "image/png" });
+          const formData = new FormData();
+          formData.append("file", file);
+
+          console.log("handleCropAndUpload -> Uploading PNG to backend");
+          try {
+            const response = await fetch("http://localhost:3000/biometric/upload-photo", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`,
+              },
+              body: formData,
+            });
+
+            console.log("handleCropAndUpload -> Upload response status:", response.status);
+            if (response.ok) {
+              const data = await response.json();
+              console.log("handleCropAndUpload -> Upload data:", data);
+              if (data.avatarUrl) {
+                updateUser({ avatarUrl: data.avatarUrl });
+                setEditorImageSrc(null);
+              }
+            } else {
+              const err = await response.text();
+              console.error("handleCropAndUpload -> Failed. Response:", err);
+            }
+          } catch (error) {
+            console.error("handleCropAndUpload -> Network error:", error);
+          } finally {
+            setIsUploading(false);
+          }
+        }, "image/png");
+      }
+    };
+    img.src = editorImageSrc;
   };
 
   return (
@@ -72,13 +232,13 @@ export default function ProfilePage() {
             <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100">{fullName}</h2>
             <p className="text-slate-500 dark:text-slate-400 font-medium mt-1">ID: {studentId}</p>
             
-            <div className="mt-6 w-full relative">
+            <div className="mt-6 w-full flex flex-col gap-3">
               <input 
                 type="file" 
                 id="profile-upload" 
                 accept="image/*" 
                 className="hidden" 
-                onChange={handleFileUpload}
+                onChange={handleFileSelect}
               />
               <label 
                 htmlFor="profile-upload" 
@@ -86,6 +246,13 @@ export default function ProfilePage() {
               >
                 Upload Profile Photo
               </label>
+              <Button 
+                onClick={startWebcam}
+                variant="outline"
+                className="w-full h-10 border-[#009FE3] text-[#009FE3] hover:bg-[#009FE3]/10"
+              >
+                Take Photo
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -128,6 +295,105 @@ export default function ProfilePage() {
           </CardContent>
         </Card>
       </div>
+
+      {isWebcamOpen && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 text-white rounded-xl shadow-2xl p-6 max-w-sm w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-200">
+            <h2 className="text-xl font-bold tracking-tight mb-4 text-slate-100">Take Profile Photo</h2>
+            
+            <div className="w-64 h-64 rounded-full overflow-hidden border-4 border-[#009FE3] shadow-md relative bg-slate-950 flex items-center justify-center mb-6">
+              <video 
+                ref={videoRef}
+                autoPlay 
+                playsInline
+                className="w-full h-full object-cover rounded-full"
+              />
+            </div>
+            
+            <div className="flex gap-3 w-full">
+              <Button 
+                onClick={stopWebcam}
+                variant="outline"
+                className="flex-1 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={capturePhoto}
+                className="flex-1 bg-[#009FE3] hover:bg-[#008bc6] text-white font-semibold"
+              >
+                Capture
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {editorImageSrc && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-800 text-white rounded-xl shadow-2xl p-6 max-w-sm w-full flex flex-col items-center animate-in fade-in zoom-in-95 duration-200">
+            <h2 className="text-xl font-bold tracking-tight mb-2 text-slate-100">Crop & Position</h2>
+            <p className="text-xs text-slate-400 mb-6 text-center">Drag the photo to align and use the slider to zoom.</p>
+            
+            <div 
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              className="w-64 h-64 rounded-full overflow-hidden border-4 border-[#009FE3] shadow-md relative bg-slate-950 flex items-center justify-center mb-6 cursor-move select-none touch-none"
+            >
+              <img 
+                src={editorImageSrc}
+                draggable={false}
+                style={{
+                  width: displayDims.w,
+                  height: displayDims.h,
+                  transform: `translate(${position.x}px, ${position.y}px) scale(${zoom})`,
+                  transformOrigin: "center center",
+                  maxWidth: "none"
+                }}
+                className="select-none pointer-events-none"
+              />
+            </div>
+            
+            <div className="w-full mb-6 flex flex-col gap-1.5">
+              <div className="flex justify-between text-xs text-slate-400 px-1 font-medium">
+                <span>Zoom</span>
+                <span>{Math.round(zoom * 100)}%</span>
+              </div>
+              <input 
+                type="range"
+                min="1"
+                max="3"
+                step="0.01"
+                value={zoom}
+                onChange={(e) => setZoom(parseFloat(e.target.value))}
+                className="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#009FE3]"
+              />
+            </div>
+            
+            <div className="flex gap-3 w-full">
+              <Button 
+                onClick={() => {
+                  console.log("Crop modal -> Exit");
+                  setEditorImageSrc(null);
+                }}
+                variant="outline"
+                className="flex-1 border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white"
+                disabled={isUploading}
+              >
+                Exit
+              </Button>
+              <Button 
+                onClick={handleCropAndUpload}
+                className="flex-1 bg-[#009FE3] hover:bg-[#008bc6] text-white font-semibold"
+                disabled={isUploading}
+              >
+                {isUploading ? "Uploading..." : "Save Photo"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

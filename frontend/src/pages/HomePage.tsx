@@ -19,6 +19,7 @@ export default function HomePage() {
   const [classSessions, setClassSessions] = useState<any[]>([]);
   const [courses, setCourses] = useState<any[]>([]);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<number[]>([]);
+  const [selectedSessionForModal, setSelectedSessionForModal] = useState<any>(null);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -194,15 +195,37 @@ export default function HomePage() {
                       else if (startDate.toDateString() === tomorrow.toDateString()) dayLabel = "Tomorrow";
 
                       const timeStr = `${startDate.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' })} - ${endDate.toLocaleTimeString("en-US", { hour: '2-digit', minute: '2-digit' })}`;
+                      const isOngoing = currentTime >= startDate && currentTime <= endDate;
                       
                       return (
-                        <div key={session.id} className="p-4 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between">
+                        <div 
+                          key={session.id} 
+                          onClick={() => {
+                            if (user?.role === 'lecturer') {
+                              console.log("Upcoming Class Card clicked -> showing roster modal for session:", session.id);
+                              setSelectedSessionForModal(session);
+                            }
+                          }}
+                          className={`p-4 bg-white dark:bg-slate-900 rounded-lg border shadow-sm flex items-center justify-between transition-all duration-300 ${
+                            isOngoing 
+                              ? "border-red-500 dark:border-red-500 ring-2 ring-red-500/20 shadow-md animate-pulse" 
+                              : "border-slate-200 dark:border-slate-800"
+                          } ${
+                            user?.role === 'lecturer' 
+                              ? "cursor-pointer hover:-translate-y-0.5 hover:shadow-md hover:border-[#009FE3]" 
+                              : ""
+                          }`}
+                        >
                           <div>
                             <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{session.course?.name || "Unknown Course"}</h3>
                             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{session.course?.courseCode} • {session.isOnline ? "Online" : session.classroom}</p>
                           </div>
                           <div className="text-right flex flex-col items-end">
-                            <span className="bg-[#e0f4fc] dark:bg-[#009FE3]/20 text-[#009FE3] dark:text-[#009FE3] px-3 py-1 rounded-full text-sm font-medium mb-1">{dayLabel}</span>
+                            {isOngoing ? (
+                              <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold mb-1 tracking-wider uppercase">ONGOING</span>
+                            ) : (
+                              <span className="bg-[#e0f4fc] dark:bg-[#009FE3]/20 text-[#009FE3] dark:text-[#009FE3] px-3 py-1 rounded-full text-sm font-medium mb-1">{dayLabel}</span>
+                            )}
                             <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">{timeStr}</p>
                           </div>
                         </div>
@@ -222,7 +245,7 @@ export default function HomePage() {
                       ) : (
                         <div className="grid grid-cols-1 gap-4">
                           {courses.map(course => (
-                            <Card key={course.id} className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-md p-4 flex flex-col">
+                            <Card key={course.id} className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-md p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#009FE3]">
                               <h3 className="text-lg font-semibold">{course.name}</h3>
                               <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{course.courseCode} • {course.credits} Credits</p>
                               <div className="mt-4 flex flex-col gap-2">
@@ -250,7 +273,7 @@ export default function HomePage() {
                       ) : (
                         <div className="grid grid-cols-1 gap-4">
                           {courses.map(course => (
-                            <Card key={course.id} className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-md p-4 flex flex-col hover:border-[#009FE3] transition-colors">
+                            <Card key={course.id} className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-md p-4 flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#009FE3]">
                               <div className="flex justify-between items-start">
                                 <div>
                                   <h3 className="text-lg font-semibold">{course.name}</h3>
@@ -353,6 +376,63 @@ export default function HomePage() {
           </Card>
         </div>
       </div>
+      
+      {selectedSessionForModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 rounded-xl shadow-2xl p-6 max-w-md w-full max-h-[85vh] flex flex-col">
+            <div className="flex justify-between items-start pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div>
+                <h2 className="text-xl font-bold tracking-tight">{selectedSessionForModal.course?.name}</h2>
+                <p className="text-sm font-mono text-[#009FE3] dark:text-[#33bbf2] mt-1">{selectedSessionForModal.course?.courseCode}</p>
+              </div>
+              <button 
+                onClick={() => setSelectedSessionForModal(null)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-1"
+              >
+                <span className="text-xl font-semibold">&times;</span>
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto py-4 space-y-3">
+              <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400">Enrolled Students ({selectedSessionForModal.course?.enrollments?.length || 0})</h3>
+              
+              {!selectedSessionForModal.course?.enrollments || selectedSessionForModal.course.enrollments.length === 0 ? (
+                <p className="text-slate-400 text-center py-6 text-sm">No students currently enrolled.</p>
+              ) : (
+                <div className="space-y-3">
+                  {selectedSessionForModal.course.enrollments.map((enrollment: any) => {
+                    const student = enrollment.student;
+                    if (!student) return null;
+                    return (
+                      <div key={student.id} className="flex items-center gap-3 p-2 rounded-lg border border-slate-100 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                        <Avatar className="h-9 w-9 border border-slate-200 dark:border-slate-700">
+                          <AvatarImage src={student.avatarUrl ? (student.avatarUrl.startsWith('http') ? student.avatarUrl : `http://localhost:3000${student.avatarUrl}`) : ""} className="object-cover" />
+                          <AvatarFallback className="bg-[#009FE3] text-white text-sm font-semibold">
+                            {student.name.substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{student.name}</p>
+                          <p className="text-xs font-mono text-slate-500 dark:text-slate-400">{student.studentId}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <Button 
+                onClick={() => setSelectedSessionForModal(null)}
+                className="bg-[#009FE3] hover:bg-[#008bc6] text-white"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

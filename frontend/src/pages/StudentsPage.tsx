@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function StudentsPage() {
   const { token } = useAuth();
@@ -45,15 +46,25 @@ export default function StudentsPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {students.map((student) => (
-          <Card key={student.id} className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-md">
+          <Card key={student.id} className="shadow-sm border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-100 rounded-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-[#009FE3]">
             <CardHeader className="pb-3">
               <div className="flex justify-between items-start">
-                <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-100">{student.name}</CardTitle>
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-10 w-10 border border-slate-200 dark:border-slate-800">
+                    <AvatarImage src={student.avatarUrl ? (student.avatarUrl.startsWith('http') ? student.avatarUrl : `http://localhost:3000${student.avatarUrl}`) : ""} className="object-cover" />
+                    <AvatarFallback className="bg-[#009FE3] text-white font-medium">
+                      {student.name.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <CardTitle className="text-lg font-semibold text-slate-800 dark:text-slate-100 text-left">{student.name}</CardTitle>
+                    <CardDescription className="text-sm font-mono text-[#009FE3] dark:text-[#33bbf2] text-left mt-0.5">{student.studentId}</CardDescription>
+                  </div>
+                </div>
                 <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800/50">
                   Active
                 </Badge>
               </div>
-              <CardDescription className="text-sm font-mono text-[#009FE3] dark:text-[#33bbf2]">{student.studentId}</CardDescription>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">BINUS University</p>
