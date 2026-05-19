@@ -5,7 +5,8 @@ import { UpdateBiometricDto } from './dto/update-biometric.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
+import * as path from 'path';
+import * as fs from 'fs';
 
 @UseGuards(AuthGuard('jwt'))
 @Controller('biometric')
@@ -18,7 +19,7 @@ export class BiometricController {
       destination: './uploads/profiles',
       filename: (req, file, callback) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const ext = extname(file.originalname);
+        const ext = path.extname(file.originalname);
         callback(null, `${uniqueSuffix}${ext}`);
       }
     })
@@ -33,6 +34,43 @@ export class BiometricController {
       path: file.path,
       avatarUrl
     };
+  }
+
+  @Post('verify-face')
+  @UseInterceptors(FileInterceptor('file', {
+    storage: diskStorage({
+      destination: './uploads/profiles',
+      filename: (req, file, callback) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const ext = path.extname(file.originalname);
+        callback(null, `verify-${uniqueSuffix}${ext}`);
+      }
+    })
+  }))
+  async verifyFace(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
+    const user = req.user;
+    console.log("verifyFace -> Verifying face for user PK ID:", user.userId);
+    
+    try {
+      const result = await this.biometricService.verifyFace(user.userId, user.role, file.path);
+      
+      try {
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+      } catch (e) {
+        console.error("verifyFace -> Temp file delete failed:", e);
+      }
+
+      return result;
+    } catch (err: any) {
+      try {
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+      } catch (e) {}
+      throw err;
+    }
   }
 
   @Post()
