@@ -129,6 +129,39 @@ export default function ProfilePage() {
     reader.readAsDataURL(file);
   };
 
+  const handleVerifyFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      console.log("handleVerifyFileSelect -> No file chosen");
+      return;
+    }
+    console.log("handleVerifyFileSelect -> Verification file chosen:", file.name);
+    setIsTestingVerification(true);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setEditorImageSrc(dataUrl);
+      setZoom(1);
+      setPosition({ x: 0, y: 0 });
+
+      const img = new Image();
+      img.onload = () => {
+        const aspect = img.width / img.height;
+        let w = 256;
+        let h = 256;
+        if (aspect > 1) {
+          w = 256 * aspect;
+        } else {
+          h = 256 / aspect;
+        }
+        setDisplayDims({ w, h });
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     console.log("handlePointerDown -> Start dragging image");
     setIsDragging(true);
@@ -165,7 +198,8 @@ export default function ProfilePage() {
       const ctx = canvas.getContext("2d");
       if (ctx) {
         const factor = 400 / 256;
-        ctx.clearRect(0, 0, 400, 400);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, 400, 400);
         ctx.save();
         ctx.translate(200, 200);
         ctx.scale(zoom, zoom);
@@ -236,7 +270,8 @@ export default function ProfilePage() {
       const ctx = canvas.getContext("2d");
       if (ctx) {
         const factor = 400 / 256;
-        ctx.clearRect(0, 0, 400, 400);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, 400, 400);
         ctx.save();
         ctx.translate(200, 200);
         ctx.scale(zoom, zoom);
@@ -378,19 +413,32 @@ export default function ProfilePage() {
 
             <div className="pt-6 border-t border-slate-100 dark:border-slate-800 flex flex-col gap-3">
               <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-200">AI Face Verification Testing</h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Click the button below to test the AI model comparison. It will activate the webcam, capture your face, and match it against your current profile photo.</p>
-              <div>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Test the AI model comparison. You can take a live photo or upload a file to match against your current profile photo.</p>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <input 
+                  type="file" 
+                  id="verify-file-upload" 
+                  accept="image/*" 
+                  className="hidden" 
+                  onChange={handleVerifyFileSelect}
+                />
+                <label 
+                  htmlFor="verify-file-upload"
+                  className={`flex items-center justify-center h-10 px-4 py-2 border border-[#009FE3] text-[#009FE3] rounded-md hover:bg-[#009FE3]/10 cursor-pointer transition-colors text-sm font-medium ${!user?.avatarUrl ? 'pointer-events-none opacity-50' : ''}`}
+                >
+                  Verify via File Upload
+                </label>
                 <Button 
                   onClick={startTestingVerification}
-                  className="bg-[#009FE3] hover:bg-[#008bc6] text-white"
+                  className="bg-[#009FE3] hover:bg-[#008bc6] text-white h-10"
                   disabled={!user?.avatarUrl}
                 >
-                  Verify Face Against Active Photo
+                  Verify via Webcam
                 </Button>
-                {!user?.avatarUrl && (
-                  <p className="text-xs text-red-500 mt-1.5 font-medium">Please upload a profile photo first to enable AI testing.</p>
-                )}
               </div>
+              {!user?.avatarUrl && (
+                <p className="text-xs text-red-500 mt-1 font-medium">Please upload a profile photo first to enable AI testing.</p>
+              )}
             </div>
           </CardContent>
         </Card>
