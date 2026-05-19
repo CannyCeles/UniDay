@@ -4,7 +4,6 @@ import { UpdateBiometricDto } from './dto/update-biometric.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
-import '@tensorflow/tfjs-node';
 import * as faceapi from 'face-api.js';
 import { Canvas, Image, ImageData, loadImage } from 'canvas';
 
@@ -38,11 +37,13 @@ export class BiometricService {
 
     const files = [
       'ssd_mobilenetv1_model-weights_manifest.json',
-      'ssd_mobilenetv1_model.shard1',
+      'ssd_mobilenetv1_model-shard1',
+      'ssd_mobilenetv1_model-shard2',
       'face_landmark_68_model-weights_manifest.json',
-      'face_landmark_68_model.shard1',
+      'face_landmark_68_model-shard1',
       'face_recognition_model-weights_manifest.json',
-      'face_recognition_model.shard1'
+      'face_recognition_model-shard1',
+      'face_recognition_model-shard2'
     ];
 
     const baseUrl = 'https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/weights/';
@@ -73,7 +74,7 @@ export class BiometricService {
     const modelDir = path.join(process.cwd(), 'weights');
     
     const faceapiEnv = faceapi.env;
-    faceapiEnv.monkeyPatch({ Canvas, Image, ImageData });
+    faceapiEnv.monkeyPatch({ Canvas: Canvas as any, Image: Image as any, ImageData: ImageData as any });
 
     await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelDir);
     await faceapi.nets.faceLandmark68Net.loadFromDisk(modelDir);
