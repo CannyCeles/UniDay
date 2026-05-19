@@ -153,6 +153,65 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col w-full gap-6">
+      <style>{`
+        .trace-card {
+          position: relative;
+          overflow: hidden;
+        }
+        .trace-line-bottom {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          height: 2px;
+          background-color: #ef4444;
+          animation: trace-bottom 4s linear infinite;
+        }
+        .trace-line-right {
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          width: 2px;
+          background-color: #ef4444;
+          animation: trace-right 4s linear infinite;
+        }
+        .trace-line-top {
+          position: absolute;
+          top: 0;
+          right: 0;
+          height: 2px;
+          background-color: #ef4444;
+          animation: trace-top 4s linear infinite;
+        }
+        .trace-line-left {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 2px;
+          background-color: #ef4444;
+          animation: trace-left 4s linear infinite;
+        }
+        @keyframes trace-bottom {
+          0% { width: 0%; left: 0; }
+          25% { width: 100%; left: 0; }
+          50% { width: 0%; left: 100%; }
+          100% { width: 0%; left: 100%; }
+        }
+        @keyframes trace-right {
+          0%, 25% { height: 0%; bottom: 0; }
+          50% { height: 100%; bottom: 0; }
+          75% { height: 0%; bottom: 100%; }
+          100% { height: 0%; bottom: 100%; }
+        }
+        @keyframes trace-top {
+          0%, 50% { width: 0%; right: 0; }
+          75% { width: 100%; right: 0; }
+          100% { width: 0%; right: 100%; }
+        }
+        @keyframes trace-left {
+          0%, 75% { height: 0%; top: 0; }
+          100% { height: 100%; top: 0; }
+        }
+      `}</style>
       <header className="flex justify-between items-center pb-4 border-b border-gray-200">
         <h1 className="text-3xl items-center font-normal text-slate-700 dark:text-slate-100 tracking-tight">Dashboard</h1>
         <div className="flex items-center gap-3">
@@ -236,9 +295,9 @@ export default function HomePage() {
                               setSelectedSessionForModal(session);
                             }
                           }}
-                          className={`p-4 bg-white dark:bg-slate-900 rounded-lg border shadow-sm flex items-center justify-between transition-all duration-300 ${
+                          className={`p-4 bg-white dark:bg-slate-900 rounded-lg border shadow-sm flex items-center justify-between transition-all duration-300 relative ${
                             isOngoing 
-                              ? "border-red-500 dark:border-red-500 ring-2 ring-red-500/50 shadow-md" 
+                              ? "trace-card border-transparent dark:border-transparent shadow-md" 
                               : "border-slate-200 dark:border-slate-800"
                           } ${
                             user?.role === 'lecturer' 
@@ -246,6 +305,14 @@ export default function HomePage() {
                               : ""
                           }`}
                         >
+                          {isOngoing && (
+                            <>
+                              <span className="trace-line-bottom" />
+                              <span className="trace-line-right" />
+                              <span className="trace-line-top" />
+                              <span className="trace-line-left" />
+                            </>
+                          )}
                           <div>
                             <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{session.course?.name || "Unknown Course"}</h3>
                             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{session.course?.courseCode} • {session.isOnline ? "Online" : session.classroom}</p>
