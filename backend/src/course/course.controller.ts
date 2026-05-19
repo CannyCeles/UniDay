@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
 import { CourseService } from './course.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
@@ -15,7 +15,10 @@ export class CourseController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Req() req: any) {
+    if (req.user && req.user.role === 'lecturer') {
+      return this.courseService.findByLecturer(req.user.userId);
+    }
     return this.courseService.findAll();
   }
 

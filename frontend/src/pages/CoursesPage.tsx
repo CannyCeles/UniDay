@@ -20,21 +20,27 @@ export default function CoursesPage() {
   const [sessionTime, setSessionTime] = useState("07:20 - 09:00");
 
   const fetchCourses = async () => {
+    console.log("fetchCourses -> Fetching courses list. Role:", user?.role, "user.id:", user?.id);
     try {
       const url = isLecturer 
         ? "http://localhost:3000/course" 
         : `http://localhost:3000/enrollment/student/${user?.id}`;
+      console.log("fetchCourses -> Request URL:", url);
       const response = await fetch(url, {
         headers: {
           Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
         }
       });
+      console.log("fetchCourses -> Response status:", response.status);
       if (response.ok) {
         const data = await response.json();
+        console.log("fetchCourses -> Courses data fetched successfully:", data);
         setCourses(data);
+      } else {
+        console.error("fetchCourses -> Server error status:", response.status);
       }
     } catch (error) {
-      console.error("Failed to fetch courses:", error);
+      console.error("fetchCourses -> Network error:", error);
     }
   };
 
@@ -146,6 +152,9 @@ export default function CoursesPage() {
             </CardHeader>
             <CardContent>
               <p className="text-sm text-slate-600 dark:text-slate-300 font-medium">{course.credits || 3} Credits</p>
+              <div className="flex justify-between items-center mt-2">
+                <span className="text-xs text-slate-500 dark:text-slate-400">Lecturer: <span className="font-semibold text-slate-700 dark:text-slate-300">{course.lecturer?.name || "N/A"}</span></span>
+              </div>
               {isLecturer && (
                 <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-sm text-[#009FE3] font-medium">
                   <span>Create Class Session &rarr;</span>

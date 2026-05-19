@@ -15,11 +15,16 @@ export default function ProfilePage() {
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+    if (!file) {
+      console.log("handleFileUpload -> No file selected.");
+      return;
+    }
+    console.log("handleFileUpload -> Selected file:", file.name, "type:", file.type, "size:", file.size);
 
     const formData = new FormData();
     formData.append("file", file);
 
+    console.log("handleFileUpload -> Sending POST upload request to backend");
     try {
       const response = await fetch("http://localhost:3000/biometric/upload-photo", {
         method: "POST",
@@ -29,18 +34,23 @@ export default function ProfilePage() {
         body: formData
       });
 
+      console.log("handleFileUpload -> Upload response status:", response.status);
       if (response.ok) {
         const data = await response.json();
-        console.log("Uploaded file response:", data);
+        console.log("handleFileUpload -> Uploaded file response data:", data);
         if (data.avatarUrl) {
+          console.log("handleFileUpload -> Updating context user with avatarUrl:", data.avatarUrl);
           updateUser({ avatarUrl: data.avatarUrl });
-          console.log("Profile updated successfully");
+          console.log("handleFileUpload -> Profile updated successfully in context and local storage");
+        } else {
+          console.error("handleFileUpload -> Response ok, but avatarUrl missing in data:", data);
         }
       } else {
-        console.error("Failed to upload photo.");
+        const errText = await response.text();
+        console.error("handleFileUpload -> Failed to upload photo. Status:", response.status, "body:", errText);
       }
     } catch (error) {
-      console.error("Upload error:", error);
+      console.error("handleFileUpload -> Upload network/runtime error:", error);
     }
   };
 

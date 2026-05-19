@@ -24,51 +24,66 @@ export default function HomePage() {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     
     const fetchClassSessions = async () => {
+      console.log("fetchClassSessions -> Fetching sessions");
       try {
         const response = await fetch("http://localhost:3000/class-session", {
           headers: {
             Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
           }
         });
+        console.log("fetchClassSessions -> Response status:", response.status);
         if (response.ok) {
           const data = await response.json();
+          console.log("fetchClassSessions -> Class sessions fetched:", data);
           setClassSessions(data);
+        } else {
+          console.error("fetchClassSessions -> Server error status:", response.status);
         }
       } catch (error) {
-        console.error("Error fetching class sessions:", error);
+        console.error("fetchClassSessions -> Network error:", error);
       }
     };
 
     const fetchCourses = async () => {
+      console.log("fetchCourses -> Fetching all courses");
       try {
         const response = await fetch("http://localhost:3000/course", {
           headers: {
             Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
           }
         });
+        console.log("fetchCourses -> Response status:", response.status);
         if (response.ok) {
           const data = await response.json();
+          console.log("fetchCourses -> Courses fetched:", data);
           setCourses(data);
+        } else {
+          console.error("fetchCourses -> Server error status:", response.status);
         }
       } catch (error) {
-        console.error("Error fetching courses:", error);
+        console.error("fetchCourses -> Network error:", error);
       }
     };
 
     const fetchEnrolledCourses = async () => {
       if (user?.role === 'student') {
+        console.log("fetchEnrolledCourses -> user.id:", user?.id);
         try {
-          const response = await fetch(`http://localhost:3000/enrollment/student/${user?.userId || user?.id}`, {
+          const response = await fetch(`http://localhost:3000/enrollment/student/${user?.id}`, {
             headers: {
               Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
             }
           });
+          console.log("fetchEnrolledCourses -> Response status:", response.status);
           if (response.ok) {
             const data = await response.json();
+            console.log("fetchEnrolledCourses -> Enrolled courses fetched:", data);
             setEnrolledCourseIds(data.map((course: any) => course.id));
+          } else {
+            console.error("fetchEnrolledCourses -> Server error status:", response.status);
           }
         } catch (error) {
-          console.error("Error fetching enrolled courses:", error);
+          console.error("fetchEnrolledCourses -> Network error:", error);
         }
       }
     };
@@ -240,6 +255,7 @@ export default function HomePage() {
                                 <div>
                                   <h3 className="text-lg font-semibold">{course.name}</h3>
                                   <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">{course.courseCode} • {course.credits || 3} Credits</p>
+                                  <p className="text-xs text-slate-400 mt-1">Lecturer: <span className="font-medium text-slate-600 dark:text-slate-300">{course.lecturer?.name || "N/A"}</span></p>
                                 </div>
                                 {enrolledCourseIds.includes(course.id) ? (
                                   <Button 
@@ -254,6 +270,7 @@ export default function HomePage() {
                                     variant="outline" 
                                     className="bg-[#009FE3] text-white border-transparent hover:bg-[#008bc6] hover:text-white"
                                     onClick={async () => {
+                                      console.log("Enrollment trigger -> course:", course.name, "courseId:", course.id, "studentId:", user?.id);
                                       try {
                                         const response = await fetch("http://localhost:3000/enrollment", {
                                           method: "POST",
@@ -262,19 +279,20 @@ export default function HomePage() {
                                             Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
                                           },
                                           body: JSON.stringify({
-                                            studentId: Number(user?.userId || user?.id),
+                                            studentId: Number(user?.id),
                                             courseId: Number(course.id)
                                           })
                                         });
+                                        console.log("Enrollment trigger -> Response status:", response.status);
                                         if (response.ok) {
-                                          console.log(`Enrolled in ${course.name}`);
+                                          console.log(`Enrollment trigger -> Success: Enrolled in ${course.name}`);
                                           setEnrolledCourseIds([...enrolledCourseIds, course.id]);
                                         } else {
-                                          const err = await response.json();
-                                          console.error("Enrollment failed", err);
+                                          const errText = await response.text();
+                                          console.error("Enrollment trigger -> Server error:", errText);
                                         }
                                       } catch (e) {
-                                        console.error(e);
+                                        console.error("Enrollment trigger -> Network error:", e);
                                       }
                                     }}
                                   >

@@ -15,6 +15,20 @@ export class StudentService {
     return this.prisma.student.findMany();
   }
 
+  async findByLecturer(lecturerId: number) {
+    return this.prisma.student.findMany({
+      where: {
+        enrollments: {
+          some: {
+            course: {
+              lecturerId
+            }
+          }
+        }
+      }
+    });
+  }
+
   async findOne(id: number) {
     return this.prisma.student.findUnique({
       where: { id }
