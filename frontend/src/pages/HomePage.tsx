@@ -20,6 +20,36 @@ export default function HomePage() {
   const [courses, setCourses] = useState<any[]>([]);
   const [enrolledCourseIds, setEnrolledCourseIds] = useState<number[]>([]);
   const [selectedSessionForModal, setSelectedSessionForModal] = useState<any>(null);
+  const [modalEnrolledStudents, setModalEnrolledStudents] = useState<any[] | null>(null);
+  const [isLoadingModalStudents, setIsLoadingModalStudents] = useState(false);
+
+  useEffect(() => {
+    if (selectedSessionForModal && selectedSessionForModal.course) {
+      console.log("Roster Modal -> Fetching enrolled students for course:", selectedSessionForModal.course.name);
+      setIsLoadingModalStudents(true);
+      fetch("http://localhost:3000/enrollment", {
+        headers: {
+          Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
+        }
+      })
+      .then(res => res.json())
+      .then(enrollments => {
+        const courseEnrollments = enrollments.filter((e: any) => e.courseId === selectedSessionForModal.course.id);
+        const students = courseEnrollments.map((e: any) => e.student).filter(Boolean);
+        console.log("Roster Modal -> Enrolled students successfully fetched:", students);
+        setModalEnrolledStudents(students);
+        setIsLoadingModalStudents(false);
+      })
+      .catch(err => {
+        console.error("Roster Modal -> Error fetching enrolled students:", err);
+        setIsLoadingModalStudents(false);
+        const preLoaded = selectedSessionForModal.course.enrollments?.map((e: any) => e.student).filter(Boolean) || [];
+        setModalEnrolledStudents(preLoaded);
+      });
+    } else {
+      setModalEnrolledStudents(null);
+    }
+  }, [selectedSessionForModal, user?.token]);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -208,7 +238,7 @@ export default function HomePage() {
                           }}
                           className={`p-4 bg-white dark:bg-slate-900 rounded-lg border shadow-sm flex items-center justify-between transition-all duration-300 ${
                             isOngoing 
-                              ? "border-red-500 dark:border-red-500 ring-2 ring-red-500/20 shadow-md animate-pulse" 
+                              ? "border-red-500 dark:border-red-500 ring-2 ring-red-500/50 shadow-md" 
                               : "border-slate-200 dark:border-slate-800"
                           } ${
                             user?.role === 'lecturer' 
@@ -394,30 +424,31 @@ export default function HomePage() {
             </div>
             
             <div className="flex-1 overflow-y-auto py-4 space-y-3">
-              <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400">Enrolled Students ({selectedSessionForModal.course?.enrollments?.length || 0})</h3>
+              <h3 className="text-sm font-semibold text-slate-500 dark:text-slate-400">Enrolled Students ({modalEnrolledStudents?.length || 0})</h3>
               
-              {!selectedSessionForModal.course?.enrollments || selectedSessionForModal.course.enrollments.length === 0 ? (
+              {isLoadingModalStudents ? (
+                <div className="flex flex-col items-center justify-center py-10 gap-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#009FE3]" />
+                  <p className="text-xs text-slate-400 font-medium">Loading roster...</p>
+                </div>
+              ) : !modalEnrolledStudents || modalEnrolledStudents.length === 0 ? (
                 <p className="text-slate-400 text-center py-6 text-sm">No students currently enrolled.</p>
               ) : (
                 <div className="space-y-3">
-                  {selectedSessionForModal.course.enrollments.map((enrollment: any) => {
-                    const student = enrollment.student;
-                    if (!student) return null;
-                    return (
-                      <div key={student.id} className="flex items-center gap-3 p-2 rounded-lg border border-slate-100 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                        <Avatar className="h-9 w-9 border border-slate-200 dark:border-slate-700">
-                          <AvatarImage src={student.avatarUrl ? (student.avatarUrl.startsWith('http') ? student.avatarUrl : `http://localhost:3000${student.avatarUrl}`) : ""} className="object-cover" />
-                          <AvatarFallback className="bg-[#009FE3] text-white text-sm font-semibold">
-                            {student.name.substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">{student.name}</p>
-                          <p className="text-xs font-mono text-slate-500 dark:text-slate-400">{student.studentId}</p>
-                        </div>
+                  {modalEnrolledStudents.map((student: any) => (
+                    <div key={student.id} className="flex items-center gap-3 p-2 rounded-lg border border-slate-100 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                      <Avatar className="h-9 w-9 border border-slate-200 dark:border-slate-700">
+                        <AvatarImage src={student.avatarUrl ? (student.avatarUrl.startsWith('http') ? student.avatarUrl : `http://localhost:3000${student.avatarUrl}`) : ""} className="object-cover" />
+                        <AvatarFallback className="bg-[#009FE3] text-white text-sm font-semibold">
+                          {student.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 text-left">{student.name}</p>
+                        <p className="text-xs font-mono text-slate-500 dark:text-slate-400 text-left">{student.studentId}</p>
                       </div>
-                    );
-                  })}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
