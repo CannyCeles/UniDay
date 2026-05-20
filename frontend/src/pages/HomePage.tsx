@@ -152,21 +152,23 @@ export default function HomePage() {
   }, [isDarkMode]);
 
   const fetchStudentAttendances = async () => {
-    if (user?.role === 'student') {
-      try {
-        const response = await fetch("http://localhost:3000/attendance", {
-          headers: {
-            Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
-          }
-        });
-        if (response.ok) {
-          const data = await response.json();
+    try {
+      const response = await fetch("http://localhost:3000/attendance", {
+        headers: {
+          Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
+        }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (user?.role === 'student') {
           const myRecords = data.filter((r: any) => r.studentId === Number(user?.id));
           setStudentAttendances(myRecords);
+        } else {
+          setStudentAttendances(data);
         }
-      } catch (error) {
-        console.error("fetchStudentAttendances -> Error:", error);
       }
+    } catch (error) {
+      console.error("fetchStudentAttendances -> Error:", error);
     }
   };
 
@@ -760,20 +762,31 @@ export default function HomePage() {
                     <p className="text-slate-400 text-center py-6 text-sm">No students currently enrolled.</p>
                   ) : (
                     <div className="space-y-3">
-                      {modalEnrolledStudents.map((student: any) => (
-                        <div key={student.id} className="flex items-center gap-3 p-2 rounded-lg border border-slate-100 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                          <Avatar className="h-9 w-9 border border-slate-200 dark:border-slate-700">
-                            <AvatarImage src={student.avatarUrl ? (student.avatarUrl.startsWith('http') ? student.avatarUrl : `http://localhost:3000${student.avatarUrl}`) : ""} className="object-cover" />
-                            <AvatarFallback className="bg-[#009FE3] text-white text-sm font-semibold">
-                              {student.name.substring(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
+                      {modalEnrolledStudents.map((student: any) => {
+                        const isAttended = studentAttendances.some((r: any) => r.studentId === student.id && r.sessionId === selectedSessionForModal.id);
+                        return (
+                        <div key={student.id} className="flex items-center justify-between p-2 rounded-lg border border-slate-100 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-9 w-9 border border-slate-200 dark:border-slate-700">
+                              <AvatarImage src={student.avatarUrl ? (student.avatarUrl.startsWith('http') ? student.avatarUrl : `http://localhost:3000${student.avatarUrl}`) : ""} className="object-cover" />
+                              <AvatarFallback className="bg-[#009FE3] text-white text-sm font-semibold">
+                                {student.name.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 text-left">{student.name}</p>
+                              <p className="text-xs font-mono text-slate-500 dark:text-slate-400 text-left">{student.studentId}</p>
+                            </div>
+                          </div>
                           <div>
-                            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 text-left">{student.name}</p>
-                            <p className="text-xs font-mono text-slate-500 dark:text-slate-400 text-left">{student.studentId}</p>
+                            {isAttended ? (
+                              <span className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-1 rounded text-xs font-semibold">Attend</span>
+                            ) : (
+                              <span className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 px-2 py-1 rounded text-xs font-semibold">Absent</span>
+                            )}
                           </div>
                         </div>
-                      ))}
+                      )})}
                     </div>
                   )}
                 </>
