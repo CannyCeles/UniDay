@@ -78,6 +78,23 @@ export class BiometricService {
     const faceapiEnv = faceapi.env;
     faceapiEnv.monkeyPatch({ Canvas: Canvas as any, Image: Image as any, ImageData: ImageData as any });
 
+    if ((faceapi as any).classes?.Box) {
+      (faceapi as any).classes.Box.assertIsValidBox = function(box: any) {
+        if (box) {
+          box.width = Math.max(1, box.width || 1);
+          box.height = Math.max(1, box.height || 1);
+        }
+      };
+    }
+    if ((faceapi as any).Box) {
+      (faceapi as any).Box.assertIsValidBox = function(box: any) {
+        if (box) {
+          box.width = Math.max(1, box.width || 1);
+          box.height = Math.max(1, box.height || 1);
+        }
+      };
+    }
+
     await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelDir);
     await faceapi.nets.tinyFaceDetector.loadFromDisk(modelDir);
     await faceapi.nets.faceLandmark68Net.loadFromDisk(modelDir);
