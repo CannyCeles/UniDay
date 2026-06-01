@@ -4,8 +4,18 @@ import { UpdateBiometricDto } from './dto/update-biometric.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as faceapi from 'face-api.js';
-import { Canvas, Image, ImageData, loadImage } from 'canvas';
+let faceapi: any = null;
+let canvasModule: any = null;
+
+async function loadFaceApi() {
+  if (!faceapi) {
+    faceapi = await import('face-api.js');
+  }
+  if (!canvasModule) {
+    canvasModule = await import('canvas');
+  }
+  return { faceapi, canvasModule };
+}
 
 @Injectable()
 export class BiometricService {
@@ -75,19 +85,22 @@ export class BiometricService {
 
     const modelDir = path.join(process.cwd(), 'weights');
     
-    const faceapiEnv = faceapi.env;
+    const { faceapi: loadedFaceapi, canvasModule: loadedCanvas } = await loadFaceApi();
+    const { Canvas, Image, ImageData } = loadedCanvas;
+
+    const faceapiEnv = loadedFaceapi.env;
     faceapiEnv.monkeyPatch({ Canvas: Canvas as any, Image: Image as any, ImageData: ImageData as any });
 
-    if ((faceapi as any).classes?.Box) {
-      (faceapi as any).classes.Box.assertIsValidBox = function(box: any) {
+    if ((loadedFaceapi as any).classes?.Box) {
+      (loadedFaceapi as any).classes.Box.assertIsValidBox = function(box: any) {
         if (box) {
           box.width = Math.max(1, box.width || 1);
           box.height = Math.max(1, box.height || 1);
         }
       };
     }
-    if ((faceapi as any).Box) {
-      (faceapi as any).Box.assertIsValidBox = function(box: any) {
+    if ((loadedFaceapi as any).Box) {
+      (loadedFaceapi as any).Box.assertIsValidBox = function(box: any) {
         if (box) {
           box.width = Math.max(1, box.width || 1);
           box.height = Math.max(1, box.height || 1);
@@ -95,10 +108,10 @@ export class BiometricService {
       };
     }
 
-    await faceapi.nets.ssdMobilenetv1.loadFromDisk(modelDir);
-    await faceapi.nets.tinyFaceDetector.loadFromDisk(modelDir);
-    await faceapi.nets.faceLandmark68Net.loadFromDisk(modelDir);
-    await faceapi.nets.faceRecognitionNet.loadFromDisk(modelDir);
+    await loadedFaceapi.nets.ssdMobilenetv1.loadFromDisk(modelDir);
+    await loadedFaceapi.nets.tinyFaceDetector.loadFromDisk(modelDir);
+    await loadedFaceapi.nets.faceLandmark68Net.loadFromDisk(modelDir);
+    await loadedFaceapi.nets.faceRecognitionNet.loadFromDisk(modelDir);
 
     this.modelsLoaded = true;
     console.log("ensureModelsLoaded -> Models loaded successfully!");
@@ -106,9 +119,10 @@ export class BiometricService {
 
   private async getFaceDescriptor(imagePath: string): Promise<Float32Array | null> {
     try {
-      const img = await loadImage(imagePath) as any;
-      const detection = await faceapi
-        .detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+      const { faceapi: loadedFaceapi, canvasModule: loadedCanvas } = await loadFaceApi();
+      const img = await loadedCanvas.loadImage(imagePath) as any;
+      const detection = await loadedFaceapi
+        .detectSingleFace(img, new loadedFaceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
         .withFaceDescriptor();
       return detection ? detection.descriptor : null;
@@ -149,7 +163,8 @@ export class BiometricService {
       throw new Error('Could not detect face in the captured photo. Please align your face in the center.');
     }
 
-    const distance = faceapi.euclideanDistance(desc1, desc2);
+    const { faceapi: loadedFaceapi } = await loadFaceApi();
+    const distance = loadedFaceapi.euclideanDistance(desc1, desc2);
     const match = distance < 0.6;
 
     console.log(`verifyFace -> Distance: ${distance}, Match: ${match}`);
