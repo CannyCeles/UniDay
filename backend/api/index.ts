@@ -1,13 +1,12 @@
 import { join } from 'path';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 
 let cachedServer: any;
 
 async function bootstrap() {
   console.log('[Bootstrap] Starting NestJS bootstrap process...');
-  
   const { NestFactory } = await import('@nestjs/core');
   const { AppModule } = await import('../src/app.module');
-  const { NestExpressApplication } = await import('@nestjs/platform-express');
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
@@ -60,7 +59,6 @@ export default async (req: any, res: any) => {
     return cachedServer(req, res);
   } catch (error: any) {
     console.error('[Error] NestJS Serverless Handler crashed:', error);
-    
     res.status(500).json({
       message: 'UniDay Backend Serverless Handler crashed during execution.',
       error: error.message || error.toString(),
