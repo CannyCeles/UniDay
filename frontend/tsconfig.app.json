@@ -24,6 +24,7 @@
     "baseUrl": ".",
     "rootDir": "./src",
     "ignoreDeprecations": "6.0",
+    "types": ["vite/client"],
     "paths": {
       "@/*": [
         "./src/*"

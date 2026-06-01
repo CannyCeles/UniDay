@@ -15,7 +15,7 @@ export default function StudentsPage() {
   useEffect(() => {
     const fetchStudents = async () => {
       try {
-        const response = await fetch("http://localhost:3000/student", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/student`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -43,13 +43,13 @@ export default function StudentsPage() {
     setSelectedStudentForModal(student);
     setIsLoadingModal(true);
     try {
-      const enrollRes = await fetch(`http://localhost:3000/enrollment/student/${student.id}`, {
+      const enrollRes = await fetch(`${import.meta.env.VITE_API_URL}/enrollment/student/${student.id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const enrolledCourses = enrollRes.ok ? await enrollRes.json() : [];
       const enrolledCourseIds = enrolledCourses.map((c: any) => c.id);
 
-      const sessionsRes = await fetch(`http://localhost:3000/class-session`, {
+      const sessionsRes = await fetch(`${import.meta.env.VITE_API_URL}/class-session`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const allSessions = sessionsRes.ok ? await sessionsRes.json() : [];
@@ -59,7 +59,7 @@ export default function StudentsPage() {
         enrolledCourseIds.includes(s.courseId) && new Date(s.endTime) < currentTime
       );
       
-      const attRes = await fetch(`http://localhost:3000/attendance`, {
+      const attRes = await fetch(`${import.meta.env.VITE_API_URL}/attendance`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const allAtt = attRes.ok ? await attRes.json() : [];

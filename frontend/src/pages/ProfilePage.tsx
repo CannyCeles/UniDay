@@ -226,7 +226,7 @@ export default function ProfilePage() {
 
           console.log("handleCropAndUpload -> Uploading PNG to backend");
           try {
-            const response = await fetch("http://localhost:3000/biometric/upload-photo", {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/biometric/upload-photo`, {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`,
@@ -298,7 +298,7 @@ export default function ProfilePage() {
 
           console.log("handleCropAndVerify -> Sending comparison request");
           try {
-            const response = await fetch("http://localhost:3000/biometric/verify-face", {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/biometric/verify-face`, {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`,

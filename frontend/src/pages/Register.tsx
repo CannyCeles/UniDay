@@ -95,7 +95,7 @@ export default function Register() {
 
     try {
       const response = await fetch(
-        "http://localhost:3000/auth/register/student",
+        `${import.meta.env.VITE_API_URL}/auth/register/student`,
         {
           method: "POST",
           headers: {
@@ -126,7 +126,7 @@ export default function Register() {
 
     try {
       const response = await fetch(
-        "http://localhost:3000/auth/register/lecturer",
+        `${import.meta.env.VITE_API_URL}/auth/register/lecturer`,
         {
           method: "POST",
           headers: {

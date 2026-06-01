@@ -23,8 +23,8 @@ export default function CoursesPage() {
     console.log("fetchCourses -> Fetching courses list. Role:", user?.role, "user.id:", user?.id);
     try {
       const url = isLecturer 
-        ? "http://localhost:3000/course" 
-        : `http://localhost:3000/enrollment/student/${user?.id}`;
+        ? `${import.meta.env.VITE_API_URL}/course`
+        : `${import.meta.env.VITE_API_URL}/enrollment/student/${user?.id}`;
       console.log("fetchCourses -> Request URL:", url);
       const response = await fetch(url, {
         headers: {
@@ -54,7 +54,7 @@ export default function CoursesPage() {
   const handleCreateCourse = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:3000/course", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/course`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -91,7 +91,7 @@ export default function CoursesPage() {
     console.log("Creating session for:", selectedCourse.id, sessionDate, sessionTime);
     
     try {
-      const response = await fetch("http://localhost:3000/class-session", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/class-session`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

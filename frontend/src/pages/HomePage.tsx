@@ -40,7 +40,7 @@ export default function HomePage() {
     if (selectedSessionForModal && selectedSessionForModal.course) {
       console.log("Roster Modal -> Fetching enrolled students for course:", selectedSessionForModal.course.name);
       setIsLoadingModalStudents(true);
-      fetch("http://localhost:3000/enrollment", {
+      fetch(`${import.meta.env.VITE_API_URL}/enrollment`, {
         headers: {
           Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
         }
@@ -70,7 +70,7 @@ export default function HomePage() {
     const fetchClassSessions = async () => {
       console.log("fetchClassSessions -> Fetching sessions");
       try {
-        const response = await fetch("http://localhost:3000/class-session", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/class-session`, {
           headers: {
             Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
           }
@@ -91,7 +91,7 @@ export default function HomePage() {
     const fetchCourses = async () => {
       console.log("fetchCourses -> Fetching all courses");
       try {
-        const response = await fetch("http://localhost:3000/course", {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/course`, {
           headers: {
             Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
           }
@@ -113,7 +113,7 @@ export default function HomePage() {
       if (user?.role === 'student') {
         console.log("fetchEnrolledCourses -> user.id:", user?.id);
         try {
-          const response = await fetch(`http://localhost:3000/enrollment/student/${user?.id}`, {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/enrollment/student/${user?.id}`, {
             headers: {
               Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
             }
@@ -153,7 +153,7 @@ export default function HomePage() {
 
   const fetchStudentAttendances = async () => {
     try {
-      const response = await fetch("http://localhost:3000/attendance", {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/attendance`, {
         headers: {
           Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`
         }
@@ -286,7 +286,7 @@ export default function HomePage() {
           formData.append("file", file);
 
           try {
-            const response = await fetch("http://localhost:3000/biometric/verify-face", {
+            const response = await fetch(`${import.meta.env.VITE_API_URL}/biometric/verify-face`, {
               method: "POST",
               headers: {
                 Authorization: `Bearer ${user?.token || localStorage.getItem("token")}`,
@@ -298,7 +298,7 @@ export default function HomePage() {
 
             if (data.match) {
               const confidencePercentage = Math.round((1 - data.distance) * 100);
-              const attResponse = await fetch("http://localhost:3000/attendance", {
+              const attResponse = await fetch(`${import.meta.env.VITE_API_URL}/attendance`, {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -650,7 +650,7 @@ export default function HomePage() {
                                     onClick={async () => {
                                       console.log("Enrollment trigger -> course:", course.name, "courseId:", course.id, "studentId:", user?.id);
                                       try {
-                                        const response = await fetch("http://localhost:3000/enrollment", {
+                                        const response = await fetch(`${import.meta.env.VITE_API_URL}/enrollment`, {
                                           method: "POST",
                                           headers: {
                                             "Content-Type": "application/json",
