@@ -1,11 +1,14 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../src/app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 
 let cachedServer: any;
 
 async function bootstrap() {
+  console.log('[Bootstrap] Starting NestJS bootstrap process...');
+  
+  const { NestFactory } = await import('@nestjs/core');
+  const { AppModule } = await import('../src/app.module');
+  const { NestExpressApplication } = await import('@nestjs/platform-express');
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.enableCors({
@@ -14,7 +17,7 @@ async function bootstrap() {
       if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
         callback(null, true);
       } else {
-        callback(new Error('Not allowed by CORS'));
+        callback(new Error(`CORS Error: Origin ${origin} not allowed`));
       }
     },
     credentials: true,
@@ -26,6 +29,7 @@ async function bootstrap() {
   });
 
   await app.init();
+  console.log('[Bootstrap] NestJS application initialized successfully.');
   return app.getHttpAdapter().getInstance();
 }
 
@@ -33,8 +37,10 @@ export default async (req: any, res: any) => {
   const origin = req.headers.origin;
   const allowedOrigins = ['https://uni-day.vercel.app', 'http://localhost:5173'];
 
-  // Instantly handle preflight OPTIONS requests to avoid bootstrapping NestJS or facing routing issues.
+  console.log(`[Request] Incoming ${req.method} request to URL: ${req.url}`);
+
   if (req.method === 'OPTIONS') {
+    console.log('[Request] Handling preflight OPTIONS request instantly...');
     if (origin && (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app'))) {
       res.setHeader('Access-Control-Allow-Origin', origin);
     } else {
@@ -47,8 +53,19 @@ export default async (req: any, res: any) => {
     return;
   }
 
-  if (!cachedServer) {
-    cachedServer = await bootstrap();
+  try {
+    if (!cachedServer) {
+      cachedServer = await bootstrap();
+    }
+    return cachedServer(req, res);
+  } catch (error: any) {
+    console.error('[Error] NestJS Serverless Handler crashed:', error);
+    
+    res.status(500).json({
+      message: 'UniDay Backend Serverless Handler crashed during execution.',
+      error: error.message || error.toString(),
+      stack: error.stack,
+      hint: 'Check Vercel real-time logs or verify package dependencies like Canvas/Prisma.'
+    });
   }
-  return cachedServer(req, res);
 };
