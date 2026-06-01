@@ -16,7 +16,13 @@ export class BiometricController {
   @Post('upload-photo')
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
-      destination: './uploads/profiles',
+      destination: (req, file, callback) => {
+        const dir = process.env.VERCEL ? require('os').tmpdir() : './uploads/profiles';
+        if (!process.env.VERCEL && !require('fs').existsSync(dir)) {
+          require('fs').mkdirSync(dir, { recursive: true });
+        }
+        callback(null, dir);
+      },
       filename: (req, file, callback) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         const ext = path.extname(file.originalname);
@@ -39,7 +45,13 @@ export class BiometricController {
   @Post('verify-face')
   @UseInterceptors(FileInterceptor('file', {
     storage: diskStorage({
-      destination: './uploads/profiles',
+      destination: (req, file, callback) => {
+        const dir = process.env.VERCEL ? require('os').tmpdir() : './uploads/profiles';
+        if (!process.env.VERCEL && !require('fs').existsSync(dir)) {
+          require('fs').mkdirSync(dir, { recursive: true });
+        }
+        callback(null, dir);
+      },
       filename: (req, file, callback) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
         const ext = path.extname(file.originalname);
