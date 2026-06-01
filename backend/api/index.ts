@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
+import { AppModule } from '../src/app.module';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
 
@@ -9,10 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.enableCors({
-    origin: [
-      'https://uni-day.vercel.app',
-      'http://localhost:5173'
-    ],
+    origin: 'https://uni-day.vercel.app',
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   });
@@ -21,16 +18,11 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
-  if (process.env.NODE_ENV !== 'production') {
-    await app.listen(process.env.PORT ?? 3000);
-  } else {
-    await app.init();
-    const expressApp = app.getHttpAdapter().getInstance();
-    return expressApp;
-  }
+  await app.init();
+  return app.getHttpAdapter().getInstance();
 }
 
-export const handler = async (req: any, res: any) => {
+export default async (req: any, res: any) => {
   if (!cachedServer) {
     cachedServer = await bootstrap();
   }
