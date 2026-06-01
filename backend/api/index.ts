@@ -1,13 +1,12 @@
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from '../src/app.module';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { join } from 'path';
-import type { NestExpressApplication } from '@nestjs/platform-express';
 
 let cachedServer: any;
 
 async function bootstrap() {
   console.log('[Bootstrap] Starting NestJS bootstrap process...');
-  const { NestFactory } = await import('@nestjs/core');
-  const { AppModule } = await import('../src/app.module');
-
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   app.enableCors({
