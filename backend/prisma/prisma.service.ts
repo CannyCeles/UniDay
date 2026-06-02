@@ -4,6 +4,6 @@ import { PrismaClient } from '../generated/prisma/client';
 @Injectable()
 export class PrismaService extends PrismaClient {
   constructor() {
-    super();
+    super(undefined as any);
   }
 }
