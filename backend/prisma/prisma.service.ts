@@ -16,6 +16,9 @@ export class PrismaService extends PrismaClient {
       database: process.env.DB_NAME ?? 'uniday_db',
       ssl: isCloud ? { rejectUnauthorized: false } : undefined,
       connectTimeout: 3000,
+      connectionLimit: 2,
+      idleTimeout: 10000,
+      acquireTimeout: 5000,
     });
 
     super({ adapter: adapter });

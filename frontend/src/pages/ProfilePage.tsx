@@ -307,15 +307,25 @@ export default function ProfilePage() {
             });
 
             console.log("handleCropAndVerify -> Verification status:", response.status);
-            const data = await response.json();
-            console.log("handleCropAndVerify -> Verification Response payload:", data);
-            
-            if (data.match) {
-              console.log("PHOTOS MATCH! Confidence distance:", data.distance);
-              alert(`MATCH SUCCESS! Similarity Confidence: ${Math.round((1 - data.distance) * 100)}% Match.`);
+            if (response.ok) {
+              const data = await response.json();
+              console.log("handleCropAndVerify -> Verification Response payload:", data);
+              
+              if (data.match) {
+                console.log("PHOTOS MATCH! Confidence distance:", data.distance);
+                alert(`MATCH SUCCESS! Similarity Confidence: ${Math.round((1 - data.distance) * 100)}% Match.`);
+              } else {
+                console.log("PHOTOS DO NOT MATCH! Confidence distance:", data.distance);
+                alert(`MATCH FAILED! Photos do not match. Similarity: ${Math.round((1 - data.distance) * 100)}% Match.`);
+              }
             } else {
-              console.log("PHOTOS DO NOT MATCH! Confidence distance:", data.distance);
-              alert(`MATCH FAILED! Photos do not match. Similarity: ${Math.round((1 - data.distance) * 100)}% Match.`);
+              const errorText = await response.text();
+              let msg = "An error occurred during verification.";
+              try {
+                const errObj = JSON.parse(errorText);
+                msg = errObj.message || msg;
+              } catch (e) {}
+              alert(`Verification Error: ${msg}`);
             }
 
             setEditorImageSrc(null);

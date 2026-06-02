@@ -30,6 +30,30 @@ export class BiometricService {
         where: { id: userId },
         data: { avatarUrl },
       });
+
+      try {
+        const filePath = process.env.VERCEL
+          ? path.join(require('os').tmpdir(), filename)
+          : path.join(process.cwd(), 'uploads', 'profiles', filename);
+        
+        await this.ensureModelsLoaded();
+        const desc = await this.getFaceDescriptor(filePath);
+        if (desc) {
+          const descArray = Array.from(desc);
+          await this.prisma.biometricProfile.upsert({
+            where: { studentId: userId },
+            create: {
+              studentId: userId,
+              descriptor: descArray,
+            },
+            update: {
+              descriptor: descArray,
+            },
+          });
+        }
+      } catch (err) {
+        console.error("updateAvatar -> Failed to save biometric profile descriptor:", err);
+      }
     } else if (role === 'lecturer') {
       await this.prisma.lecturer.update({
         where: { id: userId },
@@ -134,8 +158,17 @@ export class BiometricService {
 
   async verifyFace(userId: number, role: string, tempFilePath: string) {
     let userRecord: any;
+    let dbDescriptor: Float32Array | null = null;
+
     if (role === 'student') {
-      userRecord = await this.prisma.student.findUnique({ where: { id: userId } });
+      userRecord = await this.prisma.student.findUnique({
+        where: { id: userId },
+        include: { biometricProfile: true }
+      });
+      if (userRecord?.biometricProfile?.descriptor) {
+        const descArray = userRecord.biometricProfile.descriptor as number[];
+        dbDescriptor = new Float32Array(descArray);
+      }
     } else {
       userRecord = await this.prisma.lecturer.findUnique({ where: { id: userId } });
     }
@@ -150,13 +183,16 @@ export class BiometricService {
       : path.join(process.cwd(), 'uploads', 'profiles', filename);
     const targetTempPath = path.resolve(tempFilePath);
 
-    if (!fs.existsSync(currentAvatarPath)) {
-      throw new Error('Current avatar file does not exist on disk.');
-    }
-
     await this.ensureModelsLoaded();
 
-    const desc1 = await this.getFaceDescriptor(currentAvatarPath);
+    let desc1: Float32Array | null = dbDescriptor;
+    if (!desc1) {
+      if (!fs.existsSync(currentAvatarPath)) {
+        throw new Error('Current avatar file does not exist on disk.');
+      }
+      desc1 = await this.getFaceDescriptor(currentAvatarPath);
+    }
+
     if (!desc1) {
       throw new Error('Could not detect face in your current profile picture. Please upload a clearer profile picture.');
     }
