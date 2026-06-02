@@ -419,7 +419,7 @@ export default function HomePage() {
           </div>
           <Link to="/profile">
             <Avatar className="h-8 w-8 border border-slate-200 dark:border-slate-700 cursor-pointer hover:ring-2 hover:ring-[#009FE3] transition-all">
-              <AvatarImage src={user?.avatarUrl ? (user.avatarUrl.startsWith('http') ? user.avatarUrl : `http://localhost:3000${user.avatarUrl}`) : ""} className="object-cover" />
+              <AvatarImage src={user?.avatarUrl ? (user.avatarUrl.startsWith('http') ? user.avatarUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${user.avatarUrl}`) : ""} className="object-cover" />
               <AvatarFallback className="bg-[#009FE3] text-white text-xs">
                 {fullName.substring(0, 2).toUpperCase()}
               </AvatarFallback>
@@ -768,7 +768,7 @@ export default function HomePage() {
                         <div key={student.id} className="flex items-center justify-between p-2 rounded-lg border border-slate-100 dark:border-slate-850 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                           <div className="flex items-center gap-3">
                             <Avatar className="h-9 w-9 border border-slate-200 dark:border-slate-700">
-                              <AvatarImage src={student.avatarUrl ? (student.avatarUrl.startsWith('http') ? student.avatarUrl : `http://localhost:3000${student.avatarUrl}`) : ""} className="object-cover" />
+                              <AvatarImage src={student.avatarUrl ? (student.avatarUrl.startsWith('http') ? student.avatarUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${student.avatarUrl}`) : ""} className="object-cover" />
                               <AvatarFallback className="bg-[#009FE3] text-white text-sm font-semibold">
                                 {student.name.substring(0, 2).toUpperCase()}
                               </AvatarFallback>

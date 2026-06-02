@@ -26,6 +26,12 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
+  if (process.env.VERCEL) {
+    app.useStaticAssets(require('os').tmpdir(), {
+      prefix: '/uploads/profiles/',
+    });
+  }
+
   await app.init();
   console.log('[Bootstrap] NestJS application initialized successfully.');
   return app.getHttpAdapter().getInstance();

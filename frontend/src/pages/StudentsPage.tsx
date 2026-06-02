@@ -90,7 +90,7 @@ export default function StudentsPage() {
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-10 w-10 border border-slate-200 dark:border-slate-800">
-                    <AvatarImage src={student.avatarUrl ? (student.avatarUrl.startsWith('http') ? student.avatarUrl : `http://localhost:3000${student.avatarUrl}`) : ""} className="object-cover" />
+                    <AvatarImage src={student.avatarUrl ? (student.avatarUrl.startsWith('http') ? student.avatarUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${student.avatarUrl}`) : ""} className="object-cover" />
                     <AvatarFallback className="bg-[#009FE3] text-white font-medium">
                       {student.name.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
@@ -118,7 +118,7 @@ export default function StudentsPage() {
             <div className="flex justify-between items-start pb-4 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-4">
                 <Avatar className="h-12 w-12 border border-slate-200 dark:border-slate-800">
-                  <AvatarImage src={selectedStudentForModal.avatarUrl ? (selectedStudentForModal.avatarUrl.startsWith('http') ? selectedStudentForModal.avatarUrl : `http://localhost:3000${selectedStudentForModal.avatarUrl}`) : ""} className="object-cover" />
+                  <AvatarImage src={selectedStudentForModal.avatarUrl ? (selectedStudentForModal.avatarUrl.startsWith('http') ? selectedStudentForModal.avatarUrl : `${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${selectedStudentForModal.avatarUrl}`) : ""} className="object-cover" />
                   <AvatarFallback className="bg-[#009FE3] text-white text-lg font-medium">
                     {selectedStudentForModal.name.substring(0, 2).toUpperCase()}
                   </AvatarFallback>

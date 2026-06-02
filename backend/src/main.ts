@@ -19,6 +19,12 @@ async function bootstrap() {
     prefix: '/uploads/',
   });
 
+  if (process.env.VERCEL) {
+    app.useStaticAssets(require('os').tmpdir(), {
+      prefix: '/uploads/profiles/',
+    });
+  }
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

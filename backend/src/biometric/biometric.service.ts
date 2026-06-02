@@ -144,7 +144,10 @@ export class BiometricService {
       throw new Error('Please upload a profile photo first before verifying.');
     }
 
-    const currentAvatarPath = path.join(process.cwd(), userRecord.avatarUrl);
+    const filename = path.basename(userRecord.avatarUrl);
+    const currentAvatarPath = process.env.VERCEL
+      ? path.join(require('os').tmpdir(), filename)
+      : path.join(process.cwd(), 'uploads', 'profiles', filename);
     const targetTempPath = path.resolve(tempFilePath);
 
     if (!fs.existsSync(currentAvatarPath)) {
