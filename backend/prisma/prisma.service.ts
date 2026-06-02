@@ -10,6 +10,6 @@ export class PrismaService extends PrismaClient {
           url: process.env.DATABASE_URL,
         },
       },
-    });
+    } as any);
   }
 }
