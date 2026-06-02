@@ -64,7 +64,9 @@ export class BiometricService {
   }
 
   private async ensureModelsExist() {
-    const modelDir = path.join(process.cwd(), 'weights');
+    const modelDir = process.env.VERCEL
+      ? path.join(require('os').tmpdir(), 'weights')
+      : path.join(process.cwd(), 'weights');
     if (!fs.existsSync(modelDir)) {
       fs.mkdirSync(modelDir, { recursive: true });
     }
@@ -107,7 +109,9 @@ export class BiometricService {
     console.log("ensureModelsLoaded -> Initializing models");
     await this.ensureModelsExist();
 
-    const modelDir = path.join(process.cwd(), 'weights');
+    const modelDir = process.env.VERCEL
+      ? path.join(require('os').tmpdir(), 'weights')
+      : path.join(process.cwd(), 'weights');
     
     const { faceapi: loadedFaceapi, canvasModule: loadedCanvas } = await loadFaceApi();
     const { Canvas, Image, ImageData } = loadedCanvas;
