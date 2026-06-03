@@ -208,7 +208,7 @@ export class BiometricService {
 
     const { faceapi: loadedFaceapi } = await loadFaceApi();
     const distance = loadedFaceapi.euclideanDistance(desc1, desc2);
-    const match = distance < 0.6;
+    const match = distance < 0.4;
 
     console.log(`verifyFace -> Distance: ${distance}, Match: ${match}`);
     return {
