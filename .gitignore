@@ -16,3 +16,6 @@ exampleFrontEnd
 uploads
 phase
 /backend/weights/
+*.py
+*.pdf
+!README.md
