@@ -107,6 +107,8 @@ Traditional roll-call attendance is slow, disrupts lectures, and is highly vulne
 
 </p>
 
+---
+
 ### 🧑‍🏫 Lecturer Interface
 
 - Lecturer Dashboard (Upcoming Classes)
