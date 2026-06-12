@@ -1,4 +1,4 @@
-<img width="1901" height="911" alt="image" src="https://github.com/user-attachments/assets/ae9b3480-4056-4e86-8aa8-6d1d2f425296" /># Smart Webcam-Based Student Attendance System 🎓📸
+# Smart Webcam-Based Student Attendance System 🎓📸
 
 UniDay is a web-based student attendance system that utilizes biometric facial recognition via webcam. Built for the **AOL Software Engineering Project**, this application verifies students' faces against their pre-registered biometric profiles and records their class attendance automatically and securely.
 
@@ -119,7 +119,7 @@ Traditional roll-call attendance is slow, disrupts lectures, and is highly vulne
 - Upcoming Class Details
 
 <p align="center">
- <img width="1901" height="911" alt="image" src="https://github.com/user-attachments/assets/00cae492-605b-4bab-aaea-a94b235c2e76" />
+<img width="1901" height="911" alt="image" src="https://github.com/user-attachments/assets/ae9b3480-4056-4e86-8aa8-6d1d2f425296" />
 </p>
 
 - View Past Classes
