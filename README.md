@@ -1,4 +1,4 @@
-# Smart Webcam-Based Student Attendance System 🎓📸
+<img width="1901" height="911" alt="image" src="https://github.com/user-attachments/assets/ae9b3480-4056-4e86-8aa8-6d1d2f425296" /># Smart Webcam-Based Student Attendance System 🎓📸
 
 UniDay is a web-based student attendance system that utilizes biometric facial recognition via webcam. Built for the **AOL Software Engineering Project**, this application verifies students' faces against their pre-registered biometric profiles and records their class attendance automatically and securely.
 
@@ -105,6 +105,76 @@ Traditional roll-call attendance is slow, disrupts lectures, and is highly vulne
 <p align="center">
   <img width="1897" height="903" alt="image" src="https://github.com/user-attachments/assets/de3bbdce-f252-4c5a-89ce-fafbab25298a" />
 
+</p>
+
+### 🧑‍🏫 Lecturer Interface
+
+- Lecturer Dashboard (Upcoming Classes)
+
+<p align="center">
+  <img width="1907" height="912" alt="image" src="https://github.com/user-attachments/assets/b48f91fd-df02-4527-8226-9215977056bc" />
+
+</p>
+
+- Upcoming Class Details
+
+<p align="center">
+ <img width="1901" height="911" alt="image" src="https://github.com/user-attachments/assets/00cae492-605b-4bab-aaea-a94b235c2e76" />
+</p>
+
+- View Past Classes
+
+<p align="center">
+  <img width="1913" height="917" alt="image" src="https://github.com/user-attachments/assets/b75d3107-c2c8-4778-a6e5-6cbbf8413834" />
+
+</p>
+
+- Teaching Schedule
+
+<p align="center">
+ <img width="1911" height="912" alt="image" src="https://github.com/user-attachments/assets/f202a386-6cde-4b6e-b78c-d30ec4255b16" />
+
+</p>
+
+- Courses
+
+<p align="center">
+  <img width="1905" height="911" alt="image" src="https://github.com/user-attachments/assets/c975cd25-0c32-4aa3-890e-ee9e65010b0a" />
+
+</p>
+
+- Create Course
+
+<p align="center">
+  <img width="1906" height="911" alt="image" src="https://github.com/user-attachments/assets/6eeacaad-24dd-43a8-bb6b-9833f14fc527" />
+
+</p>
+
+- Assign Class Session
+
+<p align="center">
+  <img width="1912" height="912" alt="image" src="https://github.com/user-attachments/assets/6b70edbe-4c0a-4219-bc81-21a968c3bc0c" />
+
+</p>
+
+- Students
+
+<p align="center">
+  <img width="1907" height="906" alt="image" src="https://github.com/user-attachments/assets/4b8464c0-3c63-48b7-8a86-4c480d83b75e" />
+
+</p>
+
+- View Student Details
+
+<p align="center">
+  <img width="1911" height="910" alt="image" src="https://github.com/user-attachments/assets/34bc493c-9f4d-4a89-a732-fdd9858935c7" />
+
+</p>
+
+- Profile
+
+<p align="center">
+  <img width="1908" height="902" alt="image" src="https://github.com/user-attachments/assets/05d518ca-35e0-4cbd-887f-f81b399e4bcf" />
 </p>
 
 ---
