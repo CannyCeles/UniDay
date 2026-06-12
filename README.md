@@ -49,6 +49,66 @@ Traditional roll-call attendance is slow, disrupts lectures, and is highly vulne
 
 ---
 
+## 💻 Mockups
+
+### 🔐 Authentication Interface
+
+- Login Page
+
+<p align="center">
+  <img width="1906" height="913" alt="image" src="https://github.com/user-attachments/assets/03ac6ea9-b059-4bbe-9d35-8b77d82613be" />
+</p>
+
+- Register Page
+
+<p align="center">
+ <img width="1907" height="916" alt="image" src="https://github.com/user-attachments/assets/9f7fa61b-c5d8-4b02-bfd9-87a66472883f" />
+</p>
+
+---
+
+### 🎓 Student Interface
+
+- Student Dashboard (Upcoming Classes)
+
+<p align="center">
+<img width="1901" height="905" alt="image" src="https://github.com/user-attachments/assets/6f682def-ca40-4e6f-8531-1599cbe99fd0" />
+</p>
+
+- View Past Classes
+
+<p align="center">
+  <img width="1896" height="906" alt="image" src="https://github.com/user-attachments/assets/b0cfd450-d290-4674-ad4b-f054703657f1" />
+
+</p>
+
+- Course Enrollment
+
+<p align="center">
+  <img width="1907" height="911" alt="image" src="https://github.com/user-attachments/assets/2ce77e82-5ec6-4c58-9df9-80c5a3d03877" />
+</p>
+
+- My Enrolled Courses
+
+<p align="center">
+ <img width="1907" height="912" alt="image" src="https://github.com/user-attachments/assets/964b00fc-d55f-404a-8e1f-f8f01e50f8d6" />
+</p>
+
+- Profile
+
+<p align="center">
+  <img width="1907" height="911" alt="image" src="https://github.com/user-attachments/assets/e3d65e90-becf-4d4f-9044-f2c8a81ca487" />
+</p>
+
+- Take Profile Photo
+
+<p align="center">
+  <img width="1897" height="903" alt="image" src="https://github.com/user-attachments/assets/de3bbdce-f252-4c5a-89ce-fafbab25298a" />
+
+</p>
+
+---
+
 ## 📋 Prerequisites
 
 Before setting up the project, install these packages on your local machine:
