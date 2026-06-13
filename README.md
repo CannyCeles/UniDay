@@ -258,8 +258,3 @@ cd UniDay
    npm run dev
    ```
    The frontend application runs at `http://localhost:5173`.
-
----
-
-## 📄 Documentation Links
-For deep architectural details, database ERDs, neural network models specifications, and serverless deployment retrospectives, refer to the full [Software Documentation (DOKUMENTASI.md)](file:///c:/Users/ASUS/OneDrive%20-%20Bina%20Nusantara/Documents/Kuliah/Semester%204/Software%20En/AOL%20SE/UniDay/DOKUMENTASI.md).
